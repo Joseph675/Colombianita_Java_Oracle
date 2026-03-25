@@ -5,6 +5,7 @@ import com.colombianita.Colombianita.repository.ProductoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.colombianita.Colombianita.repository.PresentacionProductoRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,6 +17,10 @@ public class ProductoController {
 
     @Autowired
     private ProductoRepository productoRepository;
+
+    @Autowired
+    private PresentacionProductoRepository presentacionRepository;
+
 
     // 1. READ: Obtener todo el catálogo (GET)
     @GetMapping
@@ -53,6 +58,8 @@ public class ProductoController {
             productoAActualizar.setNombre(detallesProducto.getNombre());
             productoAActualizar.setDescripcion(detallesProducto.getDescripcion());
             productoAActualizar.setImagenUrl(detallesProducto.getImagenUrl());
+            productoAActualizar.setEstado(detallesProducto.getEstado());
+
             
             // Guardamos los cambios en la base de datos
             return ResponseEntity.ok(productoRepository.save(productoAActualizar));
@@ -65,7 +72,14 @@ public class ProductoController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarProducto(@PathVariable Long id) {
         if (productoRepository.existsById(id)) {
+
+            
+            // PASO 1: Destruir los registros dependientes (Las presentaciones de $25.000)
+            presentacionRepository.deleteByProductoIdProducto(id);
+            
+            // PASO 2: Destruir el registro principal (La Hamburguesa Clásica)
             productoRepository.deleteById(id);
+
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();
