@@ -1,9 +1,8 @@
 package com.colombianita.Colombianita.entity;
-import com.colombianita.Colombianita.repository.CategoriaInnovaucRepository;
-import com.colombianita.Colombianita.repository.SedeInnovaucRepository;
-
 
 import jakarta.persistence.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -26,18 +25,18 @@ public class ProyectoInnovaUcc {
     // Relación con la tabla categorias_innovaucc
     @ManyToOne
     @JoinColumn(name = "categoria_id", nullable = false)
-    private CategoriaInnovaUcc categoria;
+    private CategoriaInnovaucc categoria;
 
     // Relación con el creador/dueño del proyecto
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
-    private UsuarioInnovaUcc usuario;
+    private UsuarioInnovaucc usuario;
 
     @Column(name = "estado", nullable = false, length = 20)
     private String estado = "ACTIVO";
 
     @Column(name = "rating", precision = 3, scale = 2)
-    private Double rating = 0.0;
+    private BigDecimal rating = BigDecimal.ZERO;
 
     @Column(name = "es_nuevo", nullable = false)
     private Integer esNuevo = 1; // 1 = Sí, 0 = No
@@ -75,17 +74,17 @@ public class ProyectoInnovaUcc {
     public String getDescripcion() { return descripcion; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
-    public CategoriaInnovaUcc getCategoria() { return categoria; }
-    public void setCategoria(CategoriaInnovaUcc categoria) { this.categoria = categoria; }
+    public CategoriaInnovaucc getCategoria() { return categoria; }
+    public void setCategoria(CategoriaInnovaucc categoria) { this.categoria = categoria; }
 
-    public UsuarioInnovaUcc getUsuario() { return usuario; }
-    public void setUsuario(UsuarioInnovaUcc usuario) { this.usuario = usuario; }
+    public UsuarioInnovaucc getUsuario() { return usuario; }
+    public void setUsuario(UsuarioInnovaucc usuario) { this.usuario = usuario; }
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
 
-    public Double getRating() { return rating; }
-    public void setRating(Double rating) { this.rating = rating; }
+    public BigDecimal getRating() { return rating; }
+    public void setRating(BigDecimal rating) { this.rating = rating; }
 
     public Integer getEsNuevo() { return esNuevo; }
     public void setEsNuevo(Integer esNuevo) { this.esNuevo = esNuevo; }

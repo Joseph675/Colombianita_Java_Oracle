@@ -1,6 +1,8 @@
 package com.colombianita.Colombianita.entity;
 
+
 import jakarta.persistence.*;
+
 
 @Entity
 @Table(name = "proyecto_miembros_innovaucc", uniqueConstraints = {
@@ -21,7 +23,7 @@ public class ProyectoMiembroInnovaUcc {
     // Relación con el Usuario (El miembro del equipo)
     @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false)
-    private UsuarioInnovaUcc usuario;
+    private UsuarioInnovaucc usuario;
 
     @Column(name = "rol_en_proyecto", length = 80)
     private String rolEnProyecto = "COLABORADOR"; // Valor por defecto
@@ -35,8 +37,8 @@ public class ProyectoMiembroInnovaUcc {
     public ProyectoInnovaUcc getProyecto() { return proyecto; }
     public void setProyecto(ProyectoInnovaUcc proyecto) { this.proyecto = proyecto; }
 
-    public UsuarioInnovaUcc getUsuario() { return usuario; }
-    public void setUsuario(UsuarioInnovaUcc usuario) { this.usuario = usuario; }
+    public UsuarioInnovaucc getUsuario() { return usuario; }
+    public void setUsuario(UsuarioInnovaucc usuario) { this.usuario = usuario; }
 
     public String getRolEnProyecto() { return rolEnProyecto; }
     public void setRolEnProyecto(String rolEnProyecto) { this.rolEnProyecto = rolEnProyecto; }
