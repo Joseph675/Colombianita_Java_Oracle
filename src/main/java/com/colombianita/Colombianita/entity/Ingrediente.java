@@ -17,6 +17,9 @@ public class Ingrediente {
     @Column(name = "unidad_medida", nullable = false, length = 20)
     private String unidadMedida;
 
+      @Column(name = "costo_unitario", nullable = false, length = 20)
+    private Integer costoUnitario;
+
     public Ingrediente() {}
 
     public Long getIdIngrediente() { return idIngrediente; }
@@ -25,4 +28,6 @@ public class Ingrediente {
     public void setNombre(String nombre) { this.nombre = nombre; }
     public String getUnidadMedida() { return unidadMedida; }
     public void setUnidadMedida(String unidadMedida) { this.unidadMedida = unidadMedida; }
+    public Integer getCostoUnitario() { return costoUnitario; }
+    public void setCostoUnitario(Integer costoUnitario) { this.costoUnitario = costoUnitario; }
 }
