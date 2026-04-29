@@ -10,6 +10,7 @@ import com.colombianita.Colombianita.repository.PedidoRepository;
 import com.colombianita.Colombianita.repository.DetallePedidoRepository;
 import com.colombianita.Colombianita.repository.SucursalRepository;
 import com.colombianita.Colombianita.repository.PresentacionProductoRepository;
+import com.colombianita.Colombianita.repository.MesaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,9 @@ public class PedidoController {
 
     @Autowired
     private PresentacionProductoRepository presentacionRepository;
+
+    @Autowired
+    private MesaRepository mesaRepository;
 
     // 1. READ ALL: Obtener todos los pedidos
     @GetMapping
@@ -67,6 +71,11 @@ public class PedidoController {
         nuevoPedido.setEstado(requestDTO.getEstado());
         nuevoPedido.setFechaHora(LocalDateTime.now()); // Asignamos la hora actual del servidor
 
+        // Asignar la mesa si el pedido es de tipo 'MESA'
+        if ("MESA".equalsIgnoreCase(requestDTO.getTipoPedido()) && requestDTO.getIdMesa() != null) {
+            nuevoPedido.setIdMesa(requestDTO.getIdMesa());
+        }
+
         // Al guardar el pedido, Oracle genera automáticamente el ID
         Pedido pedidoGuardado = pedidoRepository.save(nuevoPedido);
 
@@ -97,6 +106,20 @@ public class PedidoController {
             }
         } else {
             System.out.println("🔴 ERROR DE MAPEO: La lista de detalles llegó NULA desde n8n.");
+        }
+
+        // 3. Si el pedido es para una mesa, actualizar el estado de la mesa a 'OCUPADA'
+        if ("MESA".equalsIgnoreCase(pedidoGuardado.getTipoPedido()) && pedidoGuardado.getIdMesa() != null) {
+            Optional<com.colombianita.Colombianita.entity.Mesa> mesaOpt = mesaRepository.findById(pedidoGuardado.getIdMesa());
+            if (mesaOpt.isPresent()) {
+                com.colombianita.Colombianita.entity.Mesa mesa = mesaOpt.get();
+                mesa.setEstado("OCUPADA");
+                mesaRepository.save(mesa);
+            } else {
+                // Si la mesa no existe, la transacción debe fallar.
+                // Lanzar una excepción de runtime asegura que @Transactional haga un rollback.
+                throw new RuntimeException("Error Crítico: La mesa con ID " + pedidoGuardado.getIdMesa() + " no fue encontrada. El pedido ha sido cancelado.");
+            }
         }
 
         return ResponseEntity.ok(pedidoGuardado);
@@ -142,5 +165,22 @@ public class PedidoController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    // 6. READ: Obtener pedidos activos en mesas (mesas ocupadas y qué piden)
+    @GetMapping("/mesas/ocupadas")
+    public ResponseEntity<List<Pedido>> obtenerPedidosActivosDeMesas() {
+        /*
+         * Este método requiere que agregues una función en tu PedidoRepository
+         * para buscar pedidos de tipo 'MESA' con estado diferente a 'PAGADO'
+         * y que además cargue sus detalles para evitar N+1 queries.
+         *
+         * (Verás el código para el repositorio en el Paso 4)
+        */
+        List<Pedido> pedidosActivos = pedidoRepository.findPedidosActivosDeMesaConDetalles();
+        if (pedidosActivos.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(pedidosActivos);
     }
 }

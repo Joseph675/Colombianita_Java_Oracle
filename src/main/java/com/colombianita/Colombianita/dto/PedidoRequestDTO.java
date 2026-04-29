@@ -1,25 +1,46 @@
 package com.colombianita.Colombianita.dto;
 
-import java.util.List;
 import java.math.BigDecimal;
+import java.util.List;
 
 public class PedidoRequestDTO {
-    
-    private Long idSucursal;
+    private SucursalRef sucursal;
     private BigDecimal total;
-    private String tipoPedido; // 'WHATSAPP'
-    private String estado; // 'PAGADO' o 'PENDIENTE'
+    private String tipoPedido;
+    private String estado;
+    private MesaRef mesa; 
+    
     private List<DetallePedidoDTO> detalles;
 
-    public PedidoRequestDTO() {
+    // Clases anidadas para recibir los objetos que envía Angular
+    public static class SucursalRef {
+        private Long idSucursal;
+        public Long getIdSucursal() { return idSucursal; }
+        public void setIdSucursal(Long idSucursal) { this.idSucursal = idSucursal; }
     }
 
+    public static class MesaRef {
+        private Long idMesa;
+        public Long getIdMesa() { return idMesa; }
+        public void setIdMesa(Long idMesa) { this.idMesa = idMesa; }
+    }
+
+    // Métodos auxiliares para que el Controller siga funcionando igual sin cambios
     public Long getIdSucursal() {
-        return idSucursal;
+        return sucursal != null ? sucursal.getIdSucursal() : null;
     }
 
-    public void setIdSucursal(Long idSucursal) {
-        this.idSucursal = idSucursal;
+    public Long getIdMesa() {
+        return mesa != null ? mesa.getIdMesa() : null;
+    }
+
+    // Getters y Setters de los objetos
+    public SucursalRef getSucursal() {
+        return sucursal;
+    }
+
+    public void setSucursal(SucursalRef sucursal) {
+        this.sucursal = sucursal;
     }
 
     public BigDecimal getTotal() {
@@ -44,6 +65,14 @@ public class PedidoRequestDTO {
 
     public void setEstado(String estado) {
         this.estado = estado;
+    }
+
+    public MesaRef getMesa() {
+        return mesa;
+    }
+
+    public void setMesa(MesaRef mesa) {
+        this.mesa = mesa;
     }
 
     public List<DetallePedidoDTO> getDetalles() {
