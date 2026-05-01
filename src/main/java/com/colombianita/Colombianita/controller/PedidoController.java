@@ -77,10 +77,42 @@ public class PedidoController {
         nuevoPedido.setFechaHora(LocalDateTime.now()); // Asignamos la hora actual del servidor
         nuevoPedido.setDireccionEntrega(requestDTO.getDireccionEntrega());
 
-        if (requestDTO.getIdCliente() != null) {
+        // ==========================================
+        // 🚀 INICIO DEL UPSERT DEL CLIENTE (n8n)
+        // ==========================================
+        if (requestDTO.getCliente() != null && requestDTO.getCliente().getCelular() != null) {
+            String celularRecibido = requestDTO.getCliente().getCelular();
+            String nombreRecibido = requestDTO.getCliente().getNombres(); // Asegúrate de que el DTO tenga getNombres()
+
+            // Buscamos si el cliente ya existe por su número limpio
+            Optional<Cliente> clienteExistente = clienteRepository.findByCelular(celularRecibido);
+
+            Cliente clienteDelPedido;
+            if (clienteExistente.isPresent()) {
+                System.out.println("🟢 Cliente recurrente encontrado: " + celularRecibido);
+                clienteDelPedido = clienteExistente.get(); 
+            } else {
+                System.out.println("🟡 Cliente nuevo detectado. Creando registro en BD...");
+                Cliente nuevoCliente = new Cliente();
+                nuevoCliente.setCelular(celularRecibido);
+                nuevoCliente.setNombres(nombreRecibido);
+                nuevoCliente.setDireccionPredeterminada(requestDTO.getDireccionEntrega()); // Guardamos su primera dirección
+                
+                // Guardamos y Oracle le asigna el ID automáticamente
+                clienteDelPedido = clienteRepository.save(nuevoCliente);
+            }
+            
+            // Asignamos el cliente (ya sea el viejo o el recién creado) al pedido
+            nuevoPedido.setCliente(clienteDelPedido);
+            
+        } else if (requestDTO.getIdCliente() != null) {
+            // 🛡️ Fallback: Por si en el futuro haces pedidos manuales desde tu frontend en Angular enviando el ID
             Optional<Cliente> clienteOpt = clienteRepository.findById(requestDTO.getIdCliente());
             clienteOpt.ifPresent(nuevoPedido::setCliente);
         }
+        // ==========================================
+        // FIN DEL UPSERT DEL CLIENTE
+        // ==========================================
 
         // Asignar la mesa si el pedido es de tipo 'MESA'
         if ("MESA".equalsIgnoreCase(requestDTO.getTipoPedido()) && requestDTO.getIdMesa() != null) {

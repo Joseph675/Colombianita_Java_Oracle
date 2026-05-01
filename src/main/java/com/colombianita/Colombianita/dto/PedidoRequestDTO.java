@@ -29,8 +29,15 @@ public class PedidoRequestDTO {
 
     public static class ClienteRef {
         private Long idCliente;
+        private String celular;
+        private String nombres;
+
         public Long getIdCliente() { return idCliente; }
         public void setIdCliente(Long idCliente) { this.idCliente = idCliente; }
+        public String getCelular() { return celular; }
+        public void setCelular(String celular) { this.celular = celular; }
+        public String getNombres() { return nombres; }
+        public void setNombres(String nombres) { this.nombres = nombres; }
     }
 
     // Métodos auxiliares para que el Controller siga funcionando igual sin cambios
