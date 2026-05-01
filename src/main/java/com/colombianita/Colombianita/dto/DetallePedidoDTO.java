@@ -6,6 +6,7 @@ public class DetallePedidoDTO {
     private Long idPresentacion;
     private BigDecimal fraccion;
     private BigDecimal precioCobrado;
+    private String notas;
 
     // Getters y Setters
     public Long getIdPresentacion() {
@@ -30,5 +31,13 @@ public class DetallePedidoDTO {
 
     public void setPrecioCobrado(BigDecimal precioCobrado) {
         this.precioCobrado = precioCobrado;
+    }
+
+    public String getNotas() {
+        return notas;
+    }
+
+    public void setNotas(String notas) {
+        this.notas = notas;
     }
 }

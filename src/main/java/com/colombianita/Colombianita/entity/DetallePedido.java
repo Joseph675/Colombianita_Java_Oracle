@@ -28,6 +28,9 @@ public class DetallePedido {
     @Column(name = "precio_cobrado", nullable = false, precision = 10, scale = 2)
     private BigDecimal precioCobrado;
 
+    @Column(name = "notas", length = 255)
+    private String notas;
+
     public DetallePedido() {}
 
     // Getters y Setters
@@ -45,4 +48,7 @@ public class DetallePedido {
 
     public BigDecimal getPrecioCobrado() { return precioCobrado; }
     public void setPrecioCobrado(BigDecimal precioCobrado) { this.precioCobrado = precioCobrado; }
+
+    public String getNotas() { return notas; }
+    public void setNotas(String notas) { this.notas = notas; }
 }

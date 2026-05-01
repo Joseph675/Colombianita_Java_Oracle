@@ -20,6 +20,10 @@ public class Pedido {
     @JoinColumn(name = "id_sucursal", nullable = false)
     private Sucursal sucursal;
 
+    @ManyToOne
+    @JoinColumn(name = "id_cliente")
+    private Cliente cliente;
+
     @Column(name = "fecha_hora")
     private LocalDateTime fechaHora;
 
@@ -31,6 +35,9 @@ public class Pedido {
 
     @Column(name = "id_mesa")
     private Long idMesa;
+
+    @Column(name = "direccion_entrega", length = 255)
+    private String direccionEntrega;
 
     @Column(name = "estado", length = 20)
     private String estado = "PAGADO";
@@ -56,6 +63,9 @@ public class Pedido {
     public Sucursal getSucursal() { return sucursal; }
     public void setSucursal(Sucursal sucursal) { this.sucursal = sucursal; }
 
+    public Cliente getCliente() { return cliente; }
+    public void setCliente(Cliente cliente) { this.cliente = cliente; }
+
     public LocalDateTime getFechaHora() { return fechaHora; }
     public void setFechaHora(LocalDateTime fechaHora) { this.fechaHora = fechaHora; }
 
@@ -67,6 +77,9 @@ public class Pedido {
 
     public Long getIdMesa() { return idMesa; }
     public void setIdMesa(Long idMesa) { this.idMesa = idMesa; }
+
+    public String getDireccionEntrega() { return direccionEntrega; }
+    public void setDireccionEntrega(String direccionEntrega) { this.direccionEntrega = direccionEntrega; }
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }

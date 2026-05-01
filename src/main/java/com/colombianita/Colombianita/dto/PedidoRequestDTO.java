@@ -9,6 +9,8 @@ public class PedidoRequestDTO {
     private String tipoPedido;
     private String estado;
     private MesaRef mesa; 
+    private ClienteRef cliente;
+    private String direccionEntrega;
     
     private List<DetallePedidoDTO> detalles;
 
@@ -25,6 +27,12 @@ public class PedidoRequestDTO {
         public void setIdMesa(Long idMesa) { this.idMesa = idMesa; }
     }
 
+    public static class ClienteRef {
+        private Long idCliente;
+        public Long getIdCliente() { return idCliente; }
+        public void setIdCliente(Long idCliente) { this.idCliente = idCliente; }
+    }
+
     // Métodos auxiliares para que el Controller siga funcionando igual sin cambios
     public Long getIdSucursal() {
         return sucursal != null ? sucursal.getIdSucursal() : null;
@@ -32,6 +40,10 @@ public class PedidoRequestDTO {
 
     public Long getIdMesa() {
         return mesa != null ? mesa.getIdMesa() : null;
+    }
+
+    public Long getIdCliente() {
+        return cliente != null ? cliente.getIdCliente() : null;
     }
 
     // Getters y Setters de los objetos
@@ -73,6 +85,22 @@ public class PedidoRequestDTO {
 
     public void setMesa(MesaRef mesa) {
         this.mesa = mesa;
+    }
+
+    public ClienteRef getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(ClienteRef cliente) {
+        this.cliente = cliente;
+    }
+
+    public String getDireccionEntrega() {
+        return direccionEntrega;
+    }
+
+    public void setDireccionEntrega(String direccionEntrega) {
+        this.direccionEntrega = direccionEntrega;
     }
 
     public List<DetallePedidoDTO> getDetalles() {

@@ -6,11 +6,13 @@ import com.colombianita.Colombianita.entity.Pedido;
 import com.colombianita.Colombianita.entity.DetallePedido;
 import com.colombianita.Colombianita.entity.Sucursal;
 import com.colombianita.Colombianita.entity.PresentacionProducto;
+import com.colombianita.Colombianita.entity.Cliente;
 import com.colombianita.Colombianita.repository.PedidoRepository;
 import com.colombianita.Colombianita.repository.DetallePedidoRepository;
 import com.colombianita.Colombianita.repository.SucursalRepository;
 import com.colombianita.Colombianita.repository.PresentacionProductoRepository;
 import com.colombianita.Colombianita.repository.MesaRepository;
+import com.colombianita.Colombianita.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +41,9 @@ public class PedidoController {
 
     @Autowired
     private MesaRepository mesaRepository;
+
+    @Autowired
+    private ClienteRepository clienteRepository;
 
     // 1. READ ALL: Obtener todos los pedidos
     @GetMapping
@@ -70,6 +75,12 @@ public class PedidoController {
         nuevoPedido.setTipoPedido(requestDTO.getTipoPedido());
         nuevoPedido.setEstado(requestDTO.getEstado());
         nuevoPedido.setFechaHora(LocalDateTime.now()); // Asignamos la hora actual del servidor
+        nuevoPedido.setDireccionEntrega(requestDTO.getDireccionEntrega());
+
+        if (requestDTO.getIdCliente() != null) {
+            Optional<Cliente> clienteOpt = clienteRepository.findById(requestDTO.getIdCliente());
+            clienteOpt.ifPresent(nuevoPedido::setCliente);
+        }
 
         // Asignar la mesa si el pedido es de tipo 'MESA'
         if ("MESA".equalsIgnoreCase(requestDTO.getTipoPedido()) && requestDTO.getIdMesa() != null) {
@@ -97,6 +108,7 @@ public class PedidoController {
                     detalle.setPresentacion(presentacionOpt.get());
                     detalle.setFraccion(detalleDTO.getFraccion());
                     detalle.setPrecioCobrado(detalleDTO.getPrecioCobrado());
+                    detalle.setNotas(detalleDTO.getNotas());
 
                     detallePedidoRepository.save(detalle);
                 } else {
@@ -149,6 +161,8 @@ public class PedidoController {
             pedidoAActualizar.setTipoPedido(detallesPedido.getTipoPedido());
             pedidoAActualizar.setIdMesa(detallesPedido.getIdMesa());
             pedidoAActualizar.setEstado(detallesPedido.getEstado());
+            pedidoAActualizar.setCliente(detallesPedido.getCliente());
+            pedidoAActualizar.setDireccionEntrega(detallesPedido.getDireccionEntrega());
 
             return ResponseEntity.ok(pedidoRepository.save(pedidoAActualizar));
         } else {

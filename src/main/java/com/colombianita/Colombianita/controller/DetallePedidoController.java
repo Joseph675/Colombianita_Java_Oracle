@@ -51,6 +51,7 @@ public class DetallePedidoController {
             detalleAActualizar.setPresentacion(detallesNuevos.getPresentacion());
             detalleAActualizar.setFraccion(detallesNuevos.getFraccion());
             detalleAActualizar.setPrecioCobrado(detallesNuevos.getPrecioCobrado());
+            detalleAActualizar.setNotas(detallesNuevos.getNotas());
             
             return ResponseEntity.ok(detallePedidoRepository.save(detalleAActualizar));
         } else {
