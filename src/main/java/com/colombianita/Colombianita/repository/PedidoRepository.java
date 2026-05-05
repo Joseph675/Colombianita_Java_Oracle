@@ -1,5 +1,6 @@
 package com.colombianita.Colombianita.repository;
 
+import com.colombianita.Colombianita.dto.TopClienteDTO;
 import com.colombianita.Colombianita.entity.Pedido;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,4 +26,8 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     @Query("SELECT p FROM Pedido p LEFT JOIN FETCH p.detalles dp LEFT JOIN FETCH dp.presentacion pr LEFT JOIN FETCH pr.producto WHERE p.idMesa = :idMesa ORDER BY p.fechaHora DESC")
     List<Pedido> findByIdMesaConDetalles(@Param("idMesa") Long idMesa);
 
+    // El "Top 10" de Mejores Clientes (Histórico)
+    @Query("SELECT c.idCliente as idCliente, c.nombres as nombres, c.celular as celular, SUM(p.total) as totalGastado " +
+           "FROM Pedido p JOIN p.cliente c WHERE p.estado = 'PAGADO' GROUP BY c.idCliente, c.nombres, c.celular ORDER BY totalGastado DESC")
+    List<TopClienteDTO> findTopClientes();
 }
