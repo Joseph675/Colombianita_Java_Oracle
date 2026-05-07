@@ -27,6 +27,9 @@ public class Cliente {
     @Column(name = "estado")
     private Integer estado = 1;
 
+    @Column(name = "bot_active")
+    private Integer botActive = 1;
+
     public Cliente() {}
 
     // Genera automáticamente la fecha si no se envía, simulando el DEFAULT CURRENT_TIMESTAMP
@@ -84,5 +87,13 @@ public class Cliente {
 
     public void setEstado(Integer estado) {
         this.estado = estado;
+    }
+
+    public Integer getBotActive() {
+        return botActive;
+    }
+
+    public void setBotActive(Integer botActive) {
+        this.botActive = botActive;
     }
 }

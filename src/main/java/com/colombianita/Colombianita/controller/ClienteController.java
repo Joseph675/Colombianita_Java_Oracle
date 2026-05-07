@@ -47,7 +47,11 @@ public class ClienteController {
         if (cliente.isPresent()) {
             return ResponseEntity.ok(cliente.get());
         } else {
-            return ResponseEntity.notFound().build();
+            // Si el cliente no existe, retornamos un objeto por defecto con botActive: 1
+            Cliente clienteDefault = new Cliente();
+            clienteDefault.setCelular(celular);
+            clienteDefault.setBotActive(1);
+            return ResponseEntity.ok(clienteDefault);
         }
     }
 
@@ -62,6 +66,7 @@ public class ClienteController {
             clienteAActualizar.setNombres(detallesCliente.getNombres());
             clienteAActualizar.setDireccionPredeterminada(detallesCliente.getDireccionPredeterminada());
             clienteAActualizar.setEstado(detallesCliente.getEstado());
+            clienteAActualizar.setBotActive(detallesCliente.getBotActive());
             
             return ResponseEntity.ok(clienteRepository.save(clienteAActualizar));
         } else {
