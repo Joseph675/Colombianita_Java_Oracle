@@ -84,4 +84,39 @@ public class ClienteController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    // 7. UPDATE: Desactivar el bot para un cliente específico (Usado por n8n)
+    @PutMapping("/celular/{celular}/desactivar-bot")
+    public ResponseEntity<String> desactivarBot(@PathVariable String celular) {
+        
+        // 1. Buscamos al cliente por su número
+        Optional<Cliente> clienteOpt = clienteRepository.findByCelular(celular);
+        
+        if (clienteOpt.isPresent()) {
+            Cliente cliente = clienteOpt.get();
+            
+            // 2. Cambiamos el estado a 0 (apagado)
+            cliente.setBotActive(0); 
+            
+            // 3. Guardamos en la base de datos Oracle
+            clienteRepository.save(cliente); 
+            
+            return ResponseEntity.ok("{\"status\": \"success\", \"message\": \"Bot desactivado exitosamente\"}");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // 8. UPDATE: Activar el bot para un cliente específico (Usado por n8n)
+    @PutMapping("/celular/{celular}/activar-bot")
+    public ResponseEntity<String> activarBot(@PathVariable String celular) {
+        Optional<Cliente> clienteOpt = clienteRepository.findByCelular(celular);
+        if (clienteOpt.isPresent()) {
+            Cliente cliente = clienteOpt.get();
+            cliente.setBotActive(1); // Volvemos a encender el bot
+            clienteRepository.save(cliente);
+            return ResponseEntity.ok("{\"status\": \"success\", \"message\": \"Bot reactivado\"}");
+        }
+        return ResponseEntity.notFound().build();
+    }
 }
