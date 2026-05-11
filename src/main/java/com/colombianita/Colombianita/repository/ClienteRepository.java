@@ -9,4 +9,7 @@ import java.util.Optional;
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
     // Método útil para que el bot de WhatsApp busque si el cliente ya existe
     Optional<Cliente> findByCelular(String celular);
+
+    // Buscar por ID de WhatsApp (Útil para n8n)
+    Optional<Cliente> findByWhatsappId(String whatsappId);
 }
