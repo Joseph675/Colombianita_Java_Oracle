@@ -30,6 +30,9 @@ public class Cliente {
     @Column(name = "bot_active")
     private Integer botActive = 1;
 
+    @Column(name = "whatsapp_id", unique = true, length = 64)
+    private String whatsappId;
+
     public Cliente() {}
 
     // Genera automáticamente la fecha si no se envía, simulando el DEFAULT CURRENT_TIMESTAMP
@@ -95,5 +98,13 @@ public class Cliente {
 
     public void setBotActive(Integer botActive) {
         this.botActive = botActive;
+    }
+
+    public String getWhatsappId() {
+        return whatsappId;
+    }
+
+    public void setWhatsappId(String whatsappId) {
+        this.whatsappId = whatsappId;
     }
 }

@@ -67,6 +67,7 @@ public class ClienteController {
             clienteAActualizar.setDireccionPredeterminada(detallesCliente.getDireccionPredeterminada());
             clienteAActualizar.setEstado(detallesCliente.getEstado());
             clienteAActualizar.setBotActive(detallesCliente.getBotActive());
+            clienteAActualizar.setWhatsappId(detallesCliente.getWhatsappId());
             
             return ResponseEntity.ok(clienteRepository.save(clienteAActualizar));
         } else {
@@ -118,5 +119,16 @@ public class ClienteController {
             return ResponseEntity.ok("{\"status\": \"success\", \"message\": \"Bot reactivado\"}");
         }
         return ResponseEntity.notFound().build();
+    }
+
+    // 9. READ BY WHATSAPP ID: Obtener cliente por ID de WhatsApp
+    @GetMapping("/whatsapp/{whatsappId}")
+    public ResponseEntity<Cliente> obtenerClientePorWhatsappId(@PathVariable String whatsappId) {
+        Optional<Cliente> cliente = clienteRepository.findByWhatsappId(whatsappId);
+        if (cliente.isPresent()) {
+            return ResponseEntity.ok(cliente.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

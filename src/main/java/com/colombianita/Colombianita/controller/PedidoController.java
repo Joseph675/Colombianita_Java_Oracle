@@ -5,12 +5,14 @@ import com.colombianita.Colombianita.dto.DetallePedidoDTO;
 import com.colombianita.Colombianita.entity.Pedido;
 import com.colombianita.Colombianita.entity.DetallePedido;
 import com.colombianita.Colombianita.entity.Sucursal;
+import com.colombianita.Colombianita.entity.Usuario;
 import com.colombianita.Colombianita.entity.PresentacionProducto;
 import com.colombianita.Colombianita.entity.Cliente;
 import com.colombianita.Colombianita.repository.PedidoRepository;
 import com.colombianita.Colombianita.repository.DetallePedidoRepository;
 import com.colombianita.Colombianita.repository.SucursalRepository;
 import com.colombianita.Colombianita.repository.PresentacionProductoRepository;
+import com.colombianita.Colombianita.repository.UsuarioRepository;
 import com.colombianita.Colombianita.repository.MesaRepository;
 import com.colombianita.Colombianita.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +46,9 @@ public class PedidoController {
 
     @Autowired
     private ClienteRepository clienteRepository;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     // 1. READ ALL: Obtener todos los pedidos
     @GetMapping
@@ -187,15 +192,22 @@ public class PedidoController {
 
         if (pedidoExistente.isPresent()) {
             Pedido pedidoAActualizar = pedidoExistente.get();
-            pedidoAActualizar.setSucursal(detallesPedido.getSucursal());
-            pedidoAActualizar.setFechaHora(detallesPedido.getFechaHora());
-            pedidoAActualizar.setTotal(detallesPedido.getTotal());
-            pedidoAActualizar.setTipoPedido(detallesPedido.getTipoPedido());
-            pedidoAActualizar.setIdMesa(detallesPedido.getIdMesa());
-            pedidoAActualizar.setEstado(detallesPedido.getEstado());
-            pedidoAActualizar.setCliente(detallesPedido.getCliente());
-            pedidoAActualizar.setDireccionEntrega(detallesPedido.getDireccionEntrega());
 
+            // Actualizamos campos simples solo si vienen en el request para no sobreescribir con nulos
+            if (detallesPedido.getEstado() != null) pedidoAActualizar.setEstado(detallesPedido.getEstado());
+            if (detallesPedido.getDireccionEntrega() != null) pedidoAActualizar.setDireccionEntrega(detallesPedido.getDireccionEntrega());
+            // ... puedes agregar otros campos que quieras poder actualizar
+
+            // === CAMBIO PRINCIPAL: Asignación correcta del repartidor ===
+            // Verificamos si en el JSON viene un repartidor con su ID
+            if (detallesPedido.getRepartidor() != null && detallesPedido.getRepartidor().getIdUsuario() != null) {
+                // Buscamos el usuario (repartidor) en la base de datos para obtener una entidad "managed"
+                Usuario repartidor = usuarioRepository.findById(detallesPedido.getRepartidor().getIdUsuario())
+                        .orElseThrow(() -> new RuntimeException("Error: Repartidor no encontrado con ID " + detallesPedido.getRepartidor().getIdUsuario()));
+                // Asignamos la entidad completa y gestionada al pedido
+                pedidoAActualizar.setRepartidor(repartidor);
+            }
+            
             return ResponseEntity.ok(pedidoRepository.save(pedidoAActualizar));
         } else {
             return ResponseEntity.notFound().build();
