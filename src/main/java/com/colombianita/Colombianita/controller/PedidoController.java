@@ -85,23 +85,66 @@ public class PedidoController {
         // ==========================================
         // 🚀 INICIO DEL UPSERT DEL CLIENTE (n8n)
         // ==========================================
-        if (requestDTO.getCliente() != null && requestDTO.getCliente().getCelular() != null) {
+        if (requestDTO.getCliente() != null) {
             String celularRecibido = requestDTO.getCliente().getCelular();
             String nombreRecibido = requestDTO.getCliente().getNombres(); // Asegúrate de que el DTO tenga getNombres()
+            String whatsappIdRecibido = requestDTO.getCliente().getWhatsappId();
+            String direccionRecibida = requestDTO.getDireccionEntrega();
 
-            // Buscamos si el cliente ya existe por su número limpio
-            Optional<Cliente> clienteExistente = clienteRepository.findByCelular(celularRecibido);
+            // 1. Buscamos primero por whatsappId (el ancla invariable de n8n)
+            Optional<Cliente> clienteExistente = Optional.empty();
+            if (whatsappIdRecibido != null && !whatsappIdRecibido.trim().isEmpty()) {
+                clienteExistente = clienteRepository.findByWhatsappId(whatsappIdRecibido);
+            }
+            
+            // 2. Fallback: si no lo encuentra por whatsappId, buscamos por celular (para clientes antiguos en BD)
+            if (!clienteExistente.isPresent() && celularRecibido != null && !celularRecibido.trim().isEmpty()) {
+                clienteExistente = clienteRepository.findByCelular(celularRecibido);
+            }
 
             Cliente clienteDelPedido;
             if (clienteExistente.isPresent()) {
-                System.out.println("🟢 Cliente recurrente encontrado: " + celularRecibido);
-                clienteDelPedido = clienteExistente.get(); 
+                System.out.println("🟢 Cliente recurrente encontrado en la base de datos.");
+                clienteDelPedido = clienteExistente.get();
+                
+                // Bandera para saber si hubo cambios y necesitamos hacer un UPDATE en la BD
+                boolean necesitaActualizacion = false;
+
+                // Actualizamos el nombre si nos envían uno nuevo
+                if (nombreRecibido != null && !nombreRecibido.trim().isEmpty() && !nombreRecibido.equals(clienteDelPedido.getNombres())) {
+                    clienteDelPedido.setNombres(nombreRecibido);
+                    necesitaActualizacion = true;
+                }
+
+                // Actualizamos el celular si n8n nos envía el real y es diferente al guardado temporalmente
+                if (celularRecibido != null && !celularRecibido.trim().isEmpty() && !celularRecibido.equals(clienteDelPedido.getCelular())) {
+                    clienteDelPedido.setCelular(celularRecibido);
+                    necesitaActualizacion = true;
+                }
+
+                // Actualizamos la dirección predeterminada si la del nuevo pedido es diferente a la guardada
+                if (direccionRecibida != null && !direccionRecibida.trim().isEmpty() && !direccionRecibida.equals(clienteDelPedido.getDireccionPredeterminada())) {
+                    clienteDelPedido.setDireccionPredeterminada(direccionRecibida);
+                    necesitaActualizacion = true;
+                }
+
+                // Asignamos el whatsapp_id SOLO si estaba nulo (por si lo encontramos por el fallback de celular)
+                if (whatsappIdRecibido != null && !whatsappIdRecibido.trim().isEmpty() && clienteDelPedido.getWhatsappId() == null) {
+                    clienteDelPedido.setWhatsappId(whatsappIdRecibido);
+                    necesitaActualizacion = true;
+                }
+
+                if (necesitaActualizacion) {
+                    clienteDelPedido = clienteRepository.save(clienteDelPedido);
+                    System.out.println("🔄 Información del cliente actualizada con éxito.");
+                }
             } else {
-                System.out.println("🟡 Cliente nuevo detectado. Creando registro en BD...");
+                System.out.println("� Cliente nuevo detectado. Creando registro en BD...");
                 Cliente nuevoCliente = new Cliente();
                 nuevoCliente.setCelular(celularRecibido);
                 nuevoCliente.setNombres(nombreRecibido);
-                nuevoCliente.setDireccionPredeterminada(requestDTO.getDireccionEntrega()); // Guardamos su primera dirección
+                nuevoCliente.setDireccionPredeterminada(direccionRecibida); // Guardamos su primera dirección
+                nuevoCliente.setWhatsappId(whatsappIdRecibido); // Guardamos su ID de WhatsApp desde el principio
                 
                 // Guardamos y Oracle le asigna el ID automáticamente
                 clienteDelPedido = clienteRepository.save(nuevoCliente);

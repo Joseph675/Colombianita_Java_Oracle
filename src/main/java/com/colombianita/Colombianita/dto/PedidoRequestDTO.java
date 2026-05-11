@@ -31,6 +31,7 @@ public class PedidoRequestDTO {
         private Long idCliente;
         private String celular;
         private String nombres;
+        private String whatsappId;
 
         public Long getIdCliente() { return idCliente; }
         public void setIdCliente(Long idCliente) { this.idCliente = idCliente; }
@@ -38,6 +39,8 @@ public class PedidoRequestDTO {
         public void setCelular(String celular) { this.celular = celular; }
         public String getNombres() { return nombres; }
         public void setNombres(String nombres) { this.nombres = nombres; }
+        public String getWhatsappId() { return whatsappId; }
+        public void setWhatsappId(String whatsappId) { this.whatsappId = whatsappId; }
     }
 
     // Métodos auxiliares para que el Controller siga funcionando igual sin cambios
