@@ -2,6 +2,7 @@ package com.colombianita.Colombianita.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,6 +24,10 @@ public class Pedido {
     @ManyToOne
     @JoinColumn(name = "id_cliente")
     private Cliente cliente;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_repartidor")
+    private Usuario repartidor;
 
     @Column(name = "fecha_hora")
     private LocalDateTime fechaHora;
@@ -65,6 +70,9 @@ public class Pedido {
 
     public Cliente getCliente() { return cliente; }
     public void setCliente(Cliente cliente) { this.cliente = cliente; }
+
+    public Usuario getRepartidor() { return repartidor; }
+    public void setRepartidor(Usuario repartidor) { this.repartidor = repartidor; }
 
     public LocalDateTime getFechaHora() { return fechaHora; }
     public void setFechaHora(LocalDateTime fechaHora) { this.fechaHora = fechaHora; }

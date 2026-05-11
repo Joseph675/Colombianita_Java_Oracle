@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -108,5 +109,23 @@ public class MesaController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(historial);
+    }
+
+    // 7. PATCH: Actualizar solo el estado de la mesa (ej. de OCUPADA a LIBRE)
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<?> cambiarEstadoMesa(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        String nuevoEstado = request.get("estado");
+        if (nuevoEstado == null || nuevoEstado.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Error: El campo 'estado' es requerido en el JSON.");
+        }
+
+        Optional<Mesa> mesaExistente = mesaRepository.findById(id);
+        if (mesaExistente.isPresent()) {
+            Mesa mesa = mesaExistente.get();
+            mesa.setEstado(nuevoEstado.toUpperCase()); // Convertimos a mayúsculas por convención
+            return ResponseEntity.ok(mesaRepository.save(mesa));
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
