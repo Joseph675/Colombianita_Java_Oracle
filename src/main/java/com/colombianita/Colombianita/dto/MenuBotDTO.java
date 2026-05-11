@@ -8,6 +8,7 @@ public class MenuBotDTO {
     private String categoria;
     private String producto;
     private String presentacion;
+    private String descripcion;
     private BigDecimal precio;
 
     public MenuBotDTO() {
@@ -43,6 +44,14 @@ public class MenuBotDTO {
 
     public void setPresentacion(String presentacion) {
         this.presentacion = presentacion;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
     public BigDecimal getPrecio() {

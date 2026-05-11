@@ -48,6 +48,7 @@ public class MenuController {
             dto.setCategoria(p.getProducto().getCategoria().getNombre());
             dto.setProducto(p.getProducto().getNombre());
             dto.setPresentacion(p.getNombrePresentacion());
+            dto.setDescripcion(p.getProducto().getDescripcion());
             dto.setPrecio(p.getPrecio());
             return dto;
         }).collect(Collectors.toList());
