@@ -1,7 +1,10 @@
 package com.colombianita.Colombianita.controller;
 
+import com.colombianita.Colombianita.dto.CostoRecetaDTO;
 import com.colombianita.Colombianita.entity.Receta;
+import com.colombianita.Colombianita.entity.ViewRecetaDetalle;
 import com.colombianita.Colombianita.repository.RecetaRepository;
+import com.colombianita.Colombianita.repository.ViewRecetaDetalleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +19,9 @@ public class RecetaController {
 
     @Autowired
     private RecetaRepository recetaRepository;
+
+    @Autowired
+    private ViewRecetaDetalleRepository viewRecetaDetalleRepository;
 
     // 1. READ ALL: Obtener todas las recetas
     @GetMapping
@@ -40,14 +46,34 @@ public class RecetaController {
         }
     }
 
-    // 4. READ BY PRESENTACION: Obtener todos los ingredientes de una presentación en específico
+    // 4. READ BY PRESENTACION: Obtener todos los ingredientes de una presentación (JOIN FETCH evita N+1)
     @GetMapping("/presentacion/{idPresentacion}")
     public ResponseEntity<List<Receta>> obtenerRecetaPorPresentacion(@PathVariable Long idPresentacion) {
-        List<Receta> ingredientes = recetaRepository.findByPresentacionIdPresentacion(idPresentacion);
+        List<Receta> ingredientes = recetaRepository.findConIngredienteByPresentacionId(idPresentacion);
         if (ingredientes.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.ok(ingredientes);
+    }
+
+    // 5. COSTO: Resumen de costo total de ingredientes por presentación
+    @GetMapping("/presentacion/{idPresentacion}/costo")
+    public ResponseEntity<CostoRecetaDTO> obtenerCostoPorPresentacion(@PathVariable Long idPresentacion) {
+        CostoRecetaDTO costo = recetaRepository.calcularCostoPorPresentacion(idPresentacion);
+        if (costo == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(costo);
+    }
+
+    // 6. DETALLE VISTA: Consulta directamente la vista v_receta_detalle (JOIN en DB, no en app)
+    @GetMapping("/presentacion/{idPresentacion}/detalle")
+    public ResponseEntity<List<ViewRecetaDetalle>> obtenerDetallePorPresentacion(@PathVariable Long idPresentacion) {
+        List<ViewRecetaDetalle> detalle = viewRecetaDetalleRepository.findByIdPresentacion(idPresentacion);
+        if (detalle.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(detalle);
     }
 
     // 5. UPDATE: Actualizar una cantidad o ingrediente en la receta
