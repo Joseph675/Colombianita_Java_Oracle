@@ -34,7 +34,7 @@ public class BotLockController {
             // Concatenamos el nuevo mensaje al que ya existía
             String acumulado = buffer.getMensajeAcumulado();
             buffer.setMensajeAcumulado((acumulado == null || acumulado.isEmpty()) ? 
-                                        nuevoMensaje : acumulado + "\n" + nuevoMensaje);
+                            nuevoMensaje : acumulado + ". " + nuevoMensaje);
             buffer.setUltimaActualizacion(new Timestamp(System.currentTimeMillis()));
             repository.save(buffer);
 
