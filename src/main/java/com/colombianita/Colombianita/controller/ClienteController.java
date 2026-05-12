@@ -87,11 +87,11 @@ public class ClienteController {
     }
 
     // 7. UPDATE: Desactivar el bot para un cliente específico (Usado por n8n)
-    @PutMapping("/celular/{celular}/desactivar-bot")
-    public ResponseEntity<String> desactivarBot(@PathVariable String celular) {
+    @PutMapping("/whatsapp/{whatsappId}/desactivar-bot")
+    public ResponseEntity<String> desactivarBot(@PathVariable String whatsappId) {
         
-        // 1. Buscamos al cliente por su número
-        Optional<Cliente> clienteOpt = clienteRepository.findByCelular(celular);
+        // 1. Buscamos al cliente por su ID de WhatsApp
+        Optional<Cliente> clienteOpt = clienteRepository.findByWhatsappId(whatsappId);
         
         if (clienteOpt.isPresent()) {
             Cliente cliente = clienteOpt.get();
@@ -109,9 +109,9 @@ public class ClienteController {
     }
 
     // 8. UPDATE: Activar el bot para un cliente específico (Usado por n8n)
-    @PutMapping("/celular/{celular}/activar-bot")
-    public ResponseEntity<String> activarBot(@PathVariable String celular) {
-        Optional<Cliente> clienteOpt = clienteRepository.findByCelular(celular);
+    @PutMapping("/whatsapp/{whatsappId}/activar-bot")
+    public ResponseEntity<String> activarBot(@PathVariable String whatsappId) {
+        Optional<Cliente> clienteOpt = clienteRepository.findByWhatsappId(whatsappId);
         if (clienteOpt.isPresent()) {
             Cliente cliente = clienteOpt.get();
             cliente.setBotActive(1); // Volvemos a encender el bot
