@@ -18,101 +18,70 @@ public class BotLockController {
     @Autowired
     private BufferMensajesRepository repository;
 
-    @PostMapping("/check-lock")
-    public ResponseEntity<Map<String, Object>> checkLock(@RequestBody Map<String, String> payload) {
+    // 1. Endpoint Unificado: Agrupa el mensaje y decide el flujo
+    @PostMapping("/buffer-message")
+    public ResponseEntity<Map<String, Object>> bufferMessage(@RequestBody Map<String, String> payload) {
         String celular = payload.get("numero");
+        String nuevoMensaje = payload.get("mensaje");
         Map<String, Object> response = new HashMap<>();
 
-        // 1. Buscamos si el celular ya existe en la BD
         Optional<BufferMensaje> bufferOpt = repository.findById(celular);
 
         if (bufferOpt.isPresent()) {
             BufferMensaje buffer = bufferOpt.get();
             long diferencia = System.currentTimeMillis() - buffer.getUltimaActualizacion().getTime();
-            
-            // 2. Si el mensaje llegó hace menos de 5 segundos, bloqueamos
-            if (diferencia < 5000) {
-                response.put("proceed", false);
-                return ResponseEntity.ok(response);
-            }
-            
-            // 3. Si ya pasó el tiempo, actualizamos la hora del registro
+
+            // Concatenamos el nuevo mensaje al que ya existía
+            String acumulado = buffer.getMensajeAcumulado();
+            buffer.setMensajeAcumulado((acumulado == null || acumulado.isEmpty()) ? 
+                                        nuevoMensaje : acumulado + "\n" + nuevoMensaje);
             buffer.setUltimaActualizacion(new Timestamp(System.currentTimeMillis()));
             repository.save(buffer);
+
+            // Si llegó hace menos de 5 segundos, agrupamos y DETENEMOS el flujo en n8n
+            if (diferencia < 5000) {
+                response.put("proceed", false);
+            } else {
+                // Si pasó mucho tiempo, es una nueva conversación. n8n DEBE continuar.
+                response.put("proceed", true);
+            }
         } else {
-            // 4. Si no existe, creamos el nuevo registro
+            // Es la primera vez que este cliente escribe hoy
             BufferMensaje nuevoRegistro = new BufferMensaje();
             nuevoRegistro.setCelular(celular);
+            nuevoRegistro.setMensajeAcumulado(nuevoMensaje); // ¡AQUÍ GUARDAMOS EL PRIMER MENSAJE!
             nuevoRegistro.setUltimaActualizacion(new Timestamp(System.currentTimeMillis()));
             repository.save(nuevoRegistro);
+
+            response.put("proceed", true); // n8n inicia la espera de 5 segundos
         }
 
-        response.put("proceed", true);
         return ResponseEntity.ok(response);
     }
 
-    // Endpoint 1: Acumular mensaje cuando proceed=false
-    @PostMapping("/append-message")
-    public ResponseEntity<Map<String, Object>> appendMessage(
-            @RequestBody Map<String, String> payload) {
-        
-        String celular = payload.get("numero");
-        String nuevoMensaje = payload.get("mensaje");
-        Map<String, Object> response = new HashMap<>();
-        
-        Optional<BufferMensaje> bufferOpt = repository.findById(celular);
-        
-        if (bufferOpt.isPresent()) {
-            BufferMensaje buffer = bufferOpt.get();
-            
-            // Concatenar con salto de línea
-            String acumulado = buffer.getMensajeAcumulado();
-            if (acumulado == null || acumulado.isEmpty()) {
-                buffer.setMensajeAcumulado(nuevoMensaje);
-            } else {
-                buffer.setMensajeAcumulado(acumulado + "\n" + nuevoMensaje);
-            }
-            
-            // Actualizar timestamp para reiniciar el contador de 5 segundos
-            buffer.setUltimaActualizacion(
-                new Timestamp(System.currentTimeMillis()));
-            repository.save(buffer);
-            
-            response.put("ok", true);
-        } else {
-            response.put("ok", false);
-            response.put("error", "Registro no encontrado");
-        }
-        
-        return ResponseEntity.ok(response);
-    }
-
-    // Endpoint 2: Recuperar acumulado y limpiar
+    // 2. Endpoint para Recuperar y Limpiar (Este se llama DESPUÉS del nodo Wait en n8n)
     @PostMapping("/get-and-clear")
-    public ResponseEntity<Map<String, Object>> getAndClear(
-            @RequestBody Map<String, String> payload) {
-        
+    public ResponseEntity<Map<String, Object>> getAndClear(@RequestBody Map<String, String> payload) {
         String celular = payload.get("numero");
         Map<String, Object> response = new HashMap<>();
-        
+
         Optional<BufferMensaje> bufferOpt = repository.findById(celular);
-        
+
         if (bufferOpt.isPresent()) {
             BufferMensaje buffer = bufferOpt.get();
-            
             String acumulado = buffer.getMensajeAcumulado();
-            
-            // Limpiar el acumulado
+
+            // Limpiamos el acumulado para la próxima interacción
             buffer.setMensajeAcumulado(null);
             repository.save(buffer);
-            
+
             response.put("mensajes", acumulado != null ? acumulado : "");
             response.put("ok", true);
         } else {
             response.put("mensajes", "");
             response.put("ok", false);
         }
-        
+
         return ResponseEntity.ok(response);
     }
 }
