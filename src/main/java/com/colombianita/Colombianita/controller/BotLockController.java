@@ -50,4 +50,69 @@ public class BotLockController {
         response.put("proceed", true);
         return ResponseEntity.ok(response);
     }
+
+    // Endpoint 1: Acumular mensaje cuando proceed=false
+    @PostMapping("/append-message")
+    public ResponseEntity<Map<String, Object>> appendMessage(
+            @RequestBody Map<String, String> payload) {
+        
+        String celular = payload.get("numero");
+        String nuevoMensaje = payload.get("mensaje");
+        Map<String, Object> response = new HashMap<>();
+        
+        Optional<BufferMensaje> bufferOpt = repository.findById(celular);
+        
+        if (bufferOpt.isPresent()) {
+            BufferMensaje buffer = bufferOpt.get();
+            
+            // Concatenar con salto de línea
+            String acumulado = buffer.getMensajeAcumulado();
+            if (acumulado == null || acumulado.isEmpty()) {
+                buffer.setMensajeAcumulado(nuevoMensaje);
+            } else {
+                buffer.setMensajeAcumulado(acumulado + "\n" + nuevoMensaje);
+            }
+            
+            // Actualizar timestamp para reiniciar el contador de 5 segundos
+            buffer.setUltimaActualizacion(
+                new Timestamp(System.currentTimeMillis()));
+            repository.save(buffer);
+            
+            response.put("ok", true);
+        } else {
+            response.put("ok", false);
+            response.put("error", "Registro no encontrado");
+        }
+        
+        return ResponseEntity.ok(response);
+    }
+
+    // Endpoint 2: Recuperar acumulado y limpiar
+    @PostMapping("/get-and-clear")
+    public ResponseEntity<Map<String, Object>> getAndClear(
+            @RequestBody Map<String, String> payload) {
+        
+        String celular = payload.get("numero");
+        Map<String, Object> response = new HashMap<>();
+        
+        Optional<BufferMensaje> bufferOpt = repository.findById(celular);
+        
+        if (bufferOpt.isPresent()) {
+            BufferMensaje buffer = bufferOpt.get();
+            
+            String acumulado = buffer.getMensajeAcumulado();
+            
+            // Limpiar el acumulado
+            buffer.setMensajeAcumulado(null);
+            repository.save(buffer);
+            
+            response.put("mensajes", acumulado != null ? acumulado : "");
+            response.put("ok", true);
+        } else {
+            response.put("mensajes", "");
+            response.put("ok", false);
+        }
+        
+        return ResponseEntity.ok(response);
+    }
 }

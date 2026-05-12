@@ -11,8 +11,7 @@ public class BufferMensaje {
     @Column(name = "CELULAR", length = 20)
     private String celular;
 
-    @Lob
-    @Column(name = "MENSAJE_ACUMULADO")
+    @Column(name = "MENSAJE_ACUMULADO", columnDefinition = "TEXT")
     private String mensajeAcumulado;
 
     @Column(name = "ESTADO", length = 20)
