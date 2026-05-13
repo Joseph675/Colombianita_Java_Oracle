@@ -44,6 +44,17 @@ public class AlertaInventarioController {
         return ResponseEntity.ok(alertas);
     }
 
+    // PUT /api/alertas/marcar-leidas - Marcar TODAS las alertas globales como leídas
+    @PutMapping("/marcar-leidas")
+    public ResponseEntity<Void> marcarTodasComoLeidasGlobal() {
+        List<AlertaInventario> alertasNoLeidas = alertaRepository.findByEstadoOrderByFechaAlertaDesc("NO_LEIDA");
+        for (AlertaInventario alerta : alertasNoLeidas) {
+            alerta.setEstado("LEIDA");
+        }
+        alertaRepository.saveAll(alertasNoLeidas);
+        return ResponseEntity.ok().build();
+    }
+
     // 4. POST /api/alertas - Crear una nueva alerta manualmente (o desde un servicio automático)
     @PostMapping
     public ResponseEntity<AlertaInventario> crearAlerta(@RequestBody AlertaInventario alerta) {
