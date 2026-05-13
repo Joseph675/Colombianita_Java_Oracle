@@ -46,8 +46,11 @@ public class InventarioSucursalController {
         if (inventarioExistente.isPresent()) {
             InventarioSucursal inventarioAActualizar = inventarioExistente.get();
             
-            inventarioAActualizar.setSucursal(detallesInventario.getSucursal());
-            inventarioAActualizar.setIngrediente(detallesInventario.getIngrediente());
+            // NO actualizamos las relaciones (Sucursal, Ingrediente) para evitar el error.
+            // El JSON que llega de Angular probablemente no trae esos objetos completos,
+            // lo que causa que Hibernate intente guardar un valor nulo en un campo NOT NULL.
+            
+            // Actualizamos solo las cantidades.
             inventarioAActualizar.setCantidadActual(detallesInventario.getCantidadActual());
             inventarioAActualizar.setCantidadMinima(detallesInventario.getCantidadMinima());
             
