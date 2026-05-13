@@ -40,19 +40,25 @@ public class InventarioSucursalController {
 
     // UPDATE: Modificar un registro de inventario (PUT)
     @PutMapping("/{id}")
-    public ResponseEntity<InventarioSucursal> actualizarInventario(@PathVariable Long id, @RequestBody InventarioSucursal detallesInventario) {
+    public ResponseEntity<InventarioSucursal> actualizarInventario(@PathVariable Long id, @RequestBody java.util.Map<String, Object> detallesInventario) {
         Optional<InventarioSucursal> inventarioExistente = inventarioRepository.findById(id);
         
         if (inventarioExistente.isPresent()) {
             InventarioSucursal inventarioAActualizar = inventarioExistente.get();
             
-            // NO actualizamos las relaciones (Sucursal, Ingrediente) para evitar el error.
-            // El JSON que llega de Angular probablemente no trae esos objetos completos,
-            // lo que causa que Hibernate intente guardar un valor nulo en un campo NOT NULL.
-            
-            // Actualizamos solo las cantidades.
-            inventarioAActualizar.setCantidadActual(detallesInventario.getCantidadActual());
-            inventarioAActualizar.setCantidadMinima(detallesInventario.getCantidadMinima());
+            // Recibimos un Map para ser flexibles con los nombres de las variables que envía Angular.
+            // Angular está enviando "cantidad" en el JSON.
+            if (detallesInventario.containsKey("cantidad") && detallesInventario.get("cantidad") != null) {
+                inventarioAActualizar.setCantidadActual(new java.math.BigDecimal(detallesInventario.get("cantidad").toString()));
+            } else if (detallesInventario.containsKey("cantidadActual") && detallesInventario.get("cantidadActual") != null) {
+                // Fallback: Por si en el futuro decides corregirlo en Angular
+                inventarioAActualizar.setCantidadActual(new java.math.BigDecimal(detallesInventario.get("cantidadActual").toString()));
+            }
+
+            // Angular está enviando "cantidadMinima"
+            if (detallesInventario.containsKey("cantidadMinima") && detallesInventario.get("cantidadMinima") != null) {
+                inventarioAActualizar.setCantidadMinima(new java.math.BigDecimal(detallesInventario.get("cantidadMinima").toString()));
+            }
             
             return ResponseEntity.ok(inventarioRepository.save(inventarioAActualizar));
         } else {
