@@ -3,6 +3,7 @@ package com.colombianita.Colombianita.controller;
 import com.colombianita.Colombianita.entity.Cliente;
 import com.colombianita.Colombianita.repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,10 +24,14 @@ public class ClienteController {
         return clienteRepository.findAll();
     }
 
-    // 2. CREATE: Guardar un nuevo cliente
+    // 2. CREATE: Guardar un nuevo cliente (upsert por celular — evita 500 por duplicado)
     @PostMapping
-    public Cliente crearCliente(@RequestBody Cliente cliente) {
-        return clienteRepository.save(cliente);
+    public ResponseEntity<Cliente> crearCliente(@RequestBody Cliente cliente) {
+        Optional<Cliente> existente = clienteRepository.findByCelular(cliente.getCelular());
+        if (existente.isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(existente.get());
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(clienteRepository.save(cliente));
     }
 
     // 3. READ ONE: Obtener un cliente por su ID
