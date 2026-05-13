@@ -38,8 +38,8 @@ public class BotLockController {
             buffer.setUltimaActualizacion(new Timestamp(System.currentTimeMillis()));
             repository.save(buffer);
 
-            // Si llegó hace menos de 5 segundos, agrupamos y DETENEMOS el flujo en n8n
-            if (diferencia < 5000) {
+            // Si llegó hace menos de 10 segundos, agrupamos y DETENEMOS el flujo en n8n
+            if (diferencia < 10000) {
                 response.put("proceed", false);
             } else {
                 // Si pasó mucho tiempo, es una nueva conversación. n8n DEBE continuar.
@@ -53,7 +53,7 @@ public class BotLockController {
             nuevoRegistro.setUltimaActualizacion(new Timestamp(System.currentTimeMillis()));
             repository.save(nuevoRegistro);
 
-            response.put("proceed", true); // n8n inicia la espera de 5 segundos
+            response.put("proceed", true); // n8n inicia la espera de 10 segundos
         }
 
         return ResponseEntity.ok(response);
