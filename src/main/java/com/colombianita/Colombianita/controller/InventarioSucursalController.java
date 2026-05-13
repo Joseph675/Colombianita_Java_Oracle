@@ -40,24 +40,19 @@ public class InventarioSucursalController {
 
     // UPDATE: Modificar un registro de inventario (PUT)
     @PutMapping("/{id}")
-    public ResponseEntity<InventarioSucursal> actualizarInventario(@PathVariable Long id, @RequestBody java.util.Map<String, Object> detallesInventario) {
+    public ResponseEntity<InventarioSucursal> actualizarInventario(@PathVariable Long id, @RequestBody InventarioSucursal detallesInventario) {
         Optional<InventarioSucursal> inventarioExistente = inventarioRepository.findById(id);
         
         if (inventarioExistente.isPresent()) {
             InventarioSucursal inventarioAActualizar = inventarioExistente.get();
             
-            // Recibimos un Map para ser flexibles con los nombres de las variables que envía Angular.
-            // Angular está enviando "cantidad" en el JSON.
-            if (detallesInventario.containsKey("cantidad") && detallesInventario.get("cantidad") != null) {
-                inventarioAActualizar.setCantidadActual(new java.math.BigDecimal(detallesInventario.get("cantidad").toString()));
-            } else if (detallesInventario.containsKey("cantidadActual") && detallesInventario.get("cantidadActual") != null) {
-                // Fallback: Por si en el futuro decides corregirlo en Angular
-                inventarioAActualizar.setCantidadActual(new java.math.BigDecimal(detallesInventario.get("cantidadActual").toString()));
+            // Una vez que Angular envíe "cantidadActual", este código es más limpio y seguro.
+            // Actualizamos solo las cantidades asegurándonos de que no vengan nulas.
+            if (detallesInventario.getCantidadActual() != null) {
+                inventarioAActualizar.setCantidadActual(detallesInventario.getCantidadActual());
             }
-
-            // Angular está enviando "cantidadMinima"
-            if (detallesInventario.containsKey("cantidadMinima") && detallesInventario.get("cantidadMinima") != null) {
-                inventarioAActualizar.setCantidadMinima(new java.math.BigDecimal(detallesInventario.get("cantidadMinima").toString()));
+            if (detallesInventario.getCantidadMinima() != null) {
+                inventarioAActualizar.setCantidadMinima(detallesInventario.getCantidadMinima());
             }
             
             return ResponseEntity.ok(inventarioRepository.save(inventarioAActualizar));
