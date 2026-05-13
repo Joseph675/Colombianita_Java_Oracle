@@ -31,6 +31,9 @@ public class Combo {
     @Column(nullable = false)
     private Integer estado = 1;
 
+    @Column(name = "dias_aplica", length = 50)
+    private String diasAplica;
+
     public Combo() {
     }
 
@@ -74,4 +77,7 @@ public class Combo {
 
     public Integer getEstado() { return estado; }
     public void setEstado(Integer estado) { this.estado = estado; }
+
+    public String getDiasAplica() { return diasAplica; }
+    public void setDiasAplica(String diasAplica) { this.diasAplica = diasAplica; }
 }
