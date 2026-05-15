@@ -3,12 +3,21 @@ package com.colombianita.Colombianita.dto;
 import java.math.BigDecimal;
 
 public class DetallePedidoDTO {
+    private Long idDetalle;
     private Long idPresentacion;
     private BigDecimal fraccion;
     private BigDecimal precioCobrado;
     private String notas;
 
     // Getters y Setters
+    public Long getIdDetalle() {
+        return idDetalle;
+    }
+
+    public void setIdDetalle(Long idDetalle) {
+        this.idDetalle = idDetalle;
+    }
+
     public Long getIdPresentacion() {
         return idPresentacion;
     }

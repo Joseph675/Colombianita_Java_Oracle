@@ -10,6 +10,7 @@ public class PedidoRequestDTO {
     private String estado;
     private MesaRef mesa; 
     private ClienteRef cliente;
+    private RepartidorRef repartidor;
     private String direccionEntrega;
     
     private List<DetallePedidoDTO> detalles;
@@ -41,6 +42,12 @@ public class PedidoRequestDTO {
         public void setNombres(String nombres) { this.nombres = nombres; }
         public String getWhatsappId() { return whatsappId; }
         public void setWhatsappId(String whatsappId) { this.whatsappId = whatsappId; }
+    }
+
+    public static class RepartidorRef {
+        private Long idUsuario;
+        public Long getIdUsuario() { return idUsuario; }
+        public void setIdUsuario(Long idUsuario) { this.idUsuario = idUsuario; }
     }
 
     // Métodos auxiliares para que el Controller siga funcionando igual sin cambios
@@ -103,6 +110,14 @@ public class PedidoRequestDTO {
 
     public void setCliente(ClienteRef cliente) {
         this.cliente = cliente;
+    }
+
+    public RepartidorRef getRepartidor() {
+        return repartidor;
+    }
+
+    public void setRepartidor(RepartidorRef repartidor) {
+        this.repartidor = repartidor;
     }
 
     public String getDireccionEntrega() {

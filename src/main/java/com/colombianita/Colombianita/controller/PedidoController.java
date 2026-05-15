@@ -96,8 +96,9 @@ public class PedidoController {
             if (whatsappIdRecibido != null && !whatsappIdRecibido.trim().isEmpty()) {
                 clienteExistente = clienteRepository.findByWhatsappId(whatsappIdRecibido);
             }
-            
-            // 2. Fallback: si no lo encuentra por whatsappId, buscamos por celular (para clientes antiguos en BD)
+
+            // 2. Fallback: si no lo encuentra por whatsappId, buscamos por celular (para
+            // clientes antiguos en BD)
             if (!clienteExistente.isPresent() && celularRecibido != null && !celularRecibido.trim().isEmpty()) {
                 clienteExistente = clienteRepository.findByCelular(celularRecibido);
             }
@@ -106,30 +107,37 @@ public class PedidoController {
             if (clienteExistente.isPresent()) {
                 System.out.println("🟢 Cliente recurrente encontrado en la base de datos.");
                 clienteDelPedido = clienteExistente.get();
-                
+
                 // Bandera para saber si hubo cambios y necesitamos hacer un UPDATE en la BD
                 boolean necesitaActualizacion = false;
 
                 // Actualizamos el nombre si nos envían uno nuevo
-                if (nombreRecibido != null && !nombreRecibido.trim().isEmpty() && !nombreRecibido.equals(clienteDelPedido.getNombres())) {
+                if (nombreRecibido != null && !nombreRecibido.trim().isEmpty()
+                        && !nombreRecibido.equals(clienteDelPedido.getNombres())) {
                     clienteDelPedido.setNombres(nombreRecibido);
                     necesitaActualizacion = true;
                 }
 
-                // Actualizamos el celular si n8n nos envía el real y es diferente al guardado temporalmente
-                if (celularRecibido != null && !celularRecibido.trim().isEmpty() && !celularRecibido.equals(clienteDelPedido.getCelular())) {
+                // Actualizamos el celular si n8n nos envía el real y es diferente al guardado
+                // temporalmente
+                if (celularRecibido != null && !celularRecibido.trim().isEmpty()
+                        && !celularRecibido.equals(clienteDelPedido.getCelular())) {
                     clienteDelPedido.setCelular(celularRecibido);
                     necesitaActualizacion = true;
                 }
 
-                // Actualizamos la dirección predeterminada si la del nuevo pedido es diferente a la guardada
-                if (direccionRecibida != null && !direccionRecibida.trim().isEmpty() && !direccionRecibida.equals(clienteDelPedido.getDireccionPredeterminada())) {
+                // Actualizamos la dirección predeterminada si la del nuevo pedido es diferente
+                // a la guardada
+                if (direccionRecibida != null && !direccionRecibida.trim().isEmpty()
+                        && !direccionRecibida.equals(clienteDelPedido.getDireccionPredeterminada())) {
                     clienteDelPedido.setDireccionPredeterminada(direccionRecibida);
                     necesitaActualizacion = true;
                 }
 
-                // Asignamos el whatsapp_id SOLO si estaba nulo (por si lo encontramos por el fallback de celular)
-                if (whatsappIdRecibido != null && !whatsappIdRecibido.trim().isEmpty() && clienteDelPedido.getWhatsappId() == null) {
+                // Asignamos el whatsapp_id SOLO si estaba nulo (por si lo encontramos por el
+                // fallback de celular)
+                if (whatsappIdRecibido != null && !whatsappIdRecibido.trim().isEmpty()
+                        && clienteDelPedido.getWhatsappId() == null) {
                     clienteDelPedido.setWhatsappId(whatsappIdRecibido);
                     necesitaActualizacion = true;
                 }
@@ -145,16 +153,17 @@ public class PedidoController {
                 nuevoCliente.setNombres(nombreRecibido);
                 nuevoCliente.setDireccionPredeterminada(direccionRecibida); // Guardamos su primera dirección
                 nuevoCliente.setWhatsappId(whatsappIdRecibido); // Guardamos su ID de WhatsApp desde el principio
-                
+
                 // Guardamos y Oracle le asigna el ID automáticamente
                 clienteDelPedido = clienteRepository.save(nuevoCliente);
             }
-            
+
             // Asignamos el cliente (ya sea el viejo o el recién creado) al pedido
             nuevoPedido.setCliente(clienteDelPedido);
-            
+
         } else if (requestDTO.getIdCliente() != null) {
-            // 🛡️ Fallback: Por si en el futuro haces pedidos manuales desde tu frontend en Angular enviando el ID
+            // 🛡️ Fallback: Por si en el futuro haces pedidos manuales desde tu frontend en
+            // Angular enviando el ID
             Optional<Cliente> clienteOpt = clienteRepository.findById(requestDTO.getIdCliente());
             clienteOpt.ifPresent(nuevoPedido::setCliente);
         }
@@ -202,7 +211,8 @@ public class PedidoController {
 
         // 3. Si el pedido es para una mesa, actualizar el estado de la mesa a 'OCUPADA'
         if ("MESA".equalsIgnoreCase(pedidoGuardado.getTipoPedido()) && pedidoGuardado.getIdMesa() != null) {
-            Optional<com.colombianita.Colombianita.entity.Mesa> mesaOpt = mesaRepository.findById(pedidoGuardado.getIdMesa());
+            Optional<com.colombianita.Colombianita.entity.Mesa> mesaOpt = mesaRepository
+                    .findById(pedidoGuardado.getIdMesa());
             if (mesaOpt.isPresent()) {
                 com.colombianita.Colombianita.entity.Mesa mesa = mesaOpt.get();
                 mesa.setEstado("OCUPADA");
@@ -210,7 +220,8 @@ public class PedidoController {
             } else {
                 // Si la mesa no existe, la transacción debe fallar.
                 // Lanzar una excepción de runtime asegura que @Transactional haga un rollback.
-                throw new RuntimeException("Error Crítico: La mesa con ID " + pedidoGuardado.getIdMesa() + " no fue encontrada. El pedido ha sido cancelado.");
+                throw new RuntimeException("Error Crítico: La mesa con ID " + pedidoGuardado.getIdMesa()
+                        + " no fue encontrada. El pedido ha sido cancelado.");
             }
         }
 
@@ -230,31 +241,66 @@ public class PedidoController {
 
     // 4. UPDATE: Actualizar un pedido
     @PutMapping("/{id}")
-    public ResponseEntity<Pedido> actualizarPedido(@PathVariable Long id, @RequestBody Pedido detallesPedido) {
+    @Transactional
+    public ResponseEntity<Pedido> actualizarPedido(@PathVariable Long id,
+            @RequestBody PedidoRequestDTO detallesPedido) {
         Optional<Pedido> pedidoExistente = pedidoRepository.findById(id);
 
-        if (pedidoExistente.isPresent()) {
-            Pedido pedidoAActualizar = pedidoExistente.get();
-
-            // Actualizamos campos simples solo si vienen en el request para no sobreescribir con nulos
-            if (detallesPedido.getEstado() != null) pedidoAActualizar.setEstado(detallesPedido.getEstado());
-            if (detallesPedido.getDireccionEntrega() != null) pedidoAActualizar.setDireccionEntrega(detallesPedido.getDireccionEntrega());
-            // ... puedes agregar otros campos que quieras poder actualizar
-
-            // === CAMBIO PRINCIPAL: Asignación correcta del repartidor ===
-            // Verificamos si en el JSON viene un repartidor con su ID
-            if (detallesPedido.getRepartidor() != null && detallesPedido.getRepartidor().getIdUsuario() != null) {
-                // Buscamos el usuario (repartidor) en la base de datos para obtener una entidad "managed"
-                Usuario repartidor = usuarioRepository.findById(detallesPedido.getRepartidor().getIdUsuario())
-                        .orElseThrow(() -> new RuntimeException("Error: Repartidor no encontrado con ID " + detallesPedido.getRepartidor().getIdUsuario()));
-                // Asignamos la entidad completa y gestionada al pedido
-                pedidoAActualizar.setRepartidor(repartidor);
-            }
-            
-            return ResponseEntity.ok(pedidoRepository.save(pedidoAActualizar));
-        } else {
+        if (!pedidoExistente.isPresent()) {
             return ResponseEntity.notFound().build();
         }
+
+        Pedido pedidoAActualizar = pedidoExistente.get();
+
+        // 1. Campos simples
+        if (detallesPedido.getEstado() != null)
+            pedidoAActualizar.setEstado(detallesPedido.getEstado());
+        if (detallesPedido.getDireccionEntrega() != null)
+            pedidoAActualizar.setDireccionEntrega(detallesPedido.getDireccionEntrega());
+        if (detallesPedido.getTotal() != null)
+            pedidoAActualizar.setTotal(detallesPedido.getTotal());
+
+        // 2. Repartidor (lógica que ya tenías)
+        if (detallesPedido.getRepartidor() != null && detallesPedido.getRepartidor().getIdUsuario() != null) {
+            Usuario repartidor = usuarioRepository.findById(detallesPedido.getRepartidor().getIdUsuario())
+                    .orElseThrow(() -> new RuntimeException("Repartidor no encontrado"));
+            pedidoAActualizar.setRepartidor(repartidor);
+        }
+
+        // 3. Cliente
+        if (detallesPedido.getCliente() != null && detallesPedido.getCliente().getIdCliente() != null) {
+            clienteRepository.findById(detallesPedido.getCliente().getIdCliente())
+                    .ifPresent(pedidoAActualizar::setCliente);
+        }
+
+        // 4. *** DETALLES — el núcleo del fix ***
+        if (detallesPedido.getDetalles() != null) {
+            for (DetallePedidoDTO dto : detallesPedido.getDetalles()) {
+
+                if (dto.getIdDetalle() != null) {
+                    // --- Detalle EXISTENTE: actualizar fraccion, precio, notas ---
+                    detallePedidoRepository.findById(dto.getIdDetalle()).ifPresent(d -> {
+                        d.setFraccion(dto.getFraccion());
+                        d.setPrecioCobrado(dto.getPrecioCobrado());
+                        d.setNotas(dto.getNotas());
+                        detallePedidoRepository.save(d);
+                    });
+                } else {
+                    // --- Detalle NUEVO: insertar ---
+                    presentacionRepository.findById(dto.getIdPresentacion()).ifPresent(presentacion -> {
+                        DetallePedido nuevo = new DetallePedido();
+                        nuevo.setPedido(pedidoAActualizar);
+                        nuevo.setPresentacion(presentacion);
+                        nuevo.setFraccion(dto.getFraccion());
+                        nuevo.setPrecioCobrado(dto.getPrecioCobrado());
+                        nuevo.setNotas(dto.getNotas());
+                        detallePedidoRepository.save(nuevo);
+                    });
+                }
+            }
+        }
+
+        return ResponseEntity.ok(pedidoRepository.save(pedidoAActualizar));
     }
 
     // 5. DELETE: Eliminar un pedido
@@ -277,7 +323,7 @@ public class PedidoController {
          * y que además cargue sus detalles para evitar N+1 queries.
          *
          * (Verás el código para el repositorio en el Paso 4)
-        */
+         */
         List<Pedido> pedidosActivos = pedidoRepository.findPedidosActivosDeMesaConDetalles();
         if (pedidosActivos.isEmpty()) {
             return ResponseEntity.noContent().build();
