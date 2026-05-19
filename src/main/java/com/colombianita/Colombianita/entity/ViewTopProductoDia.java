@@ -6,6 +6,9 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.Immutable;
 import java.math.BigDecimal;
 
+// PATRÓN: Read Model (CQRS parcial) — entidad de solo lectura mapeada a la vista vw_top_productos_dia.
+//   Contiene campos calculados (vecesPedido, ingresosGenerados, ranking) que Oracle agrega por día.
+//   @Immutable garantiza que Hibernate nunca intente hacer INSERT/UPDATE sobre esta vista.
 @Entity
 @Table(name = "vw_top_productos_dia")
 @Immutable

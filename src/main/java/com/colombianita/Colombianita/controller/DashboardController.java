@@ -9,6 +9,11 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+// PATRÓN: Facade — expone una interfaz HTTP simplificada para el dashboard del frontend.
+//   Internamente delega en 7 repositorios de vistas distintas (Read Models), ocultando
+//   esa complejidad detrás de endpoints limpios y fáciles de consumir.
+// PATRÓN: Read Model (CQRS) — todos los datos aquí vienen de entidades @Immutable mapeadas
+//   a vistas de Oracle, nunca de las entidades de escritura.
 @RestController
 @RequestMapping("/api/dashboard")
 @CrossOrigin(origins = "*")

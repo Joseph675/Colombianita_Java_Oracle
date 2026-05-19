@@ -11,6 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+// PATRÓN: Message Aggregator — este controller implementa la lógica de agrupación de mensajes.
+//   /buffer-message acumula mensajes del mismo número dentro de una ventana de 10 segundos.
+//   /get-and-clear entrega el mensaje consolidado a n8n y limpia el buffer para la próxima vez.
+//   El resultado: n8n recibe un solo mensaje enriquecido en lugar de fragmentos separados.
 @RestController
 @RequestMapping("/api/bot")
 public class BotLockController {
@@ -18,7 +22,9 @@ public class BotLockController {
     @Autowired
     private BufferMensajesRepository repository;
 
-    // 1. Endpoint Unificado: Agrupa el mensaje y decide el flujo
+    // PATRÓN: Message Aggregator — recibe cada fragmento de mensaje y lo concatena en el buffer.
+    //   Si el último mensaje llegó hace menos de 10s → detiene el flujo en n8n (proceed: false).
+    //   Si pasó más tiempo → inicia una nueva sesión de agrupación (proceed: true).
     @PostMapping("/buffer-message")
     public ResponseEntity<Map<String, Object>> bufferMessage(@RequestBody Map<String, String> payload) {
         String celular = payload.get("numero");
@@ -59,7 +65,8 @@ public class BotLockController {
         return ResponseEntity.ok(response);
     }
 
-    // 2. Endpoint para Recuperar y Limpiar (Este se llama DESPUÉS del nodo Wait en n8n)
+    // PATRÓN: Message Aggregator — entrega el mensaje consolidado y limpia el buffer.
+    //   n8n lo llama tras el nodo Wait para obtener el texto completo que el usuario escribió.
     @PostMapping("/get-and-clear")
     public ResponseEntity<Map<String, Object>> getAndClear(@RequestBody Map<String, String> payload) {
         String celular = payload.get("numero");

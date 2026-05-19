@@ -3,6 +3,8 @@ package com.colombianita.Colombianita.dto;
 import com.colombianita.Colombianita.entity.Rol;
 import com.colombianita.Colombianita.entity.Sucursal;
 
+// PATRÓN: DTO (Data Transfer Object) — separa la entidad Usuario (que contiene passwordHash)
+//   de la respuesta que se envía al cliente. Nunca se expone la contraseña por esta vía.
 public class UsuarioDTO {
 
     private Long idUsuario;

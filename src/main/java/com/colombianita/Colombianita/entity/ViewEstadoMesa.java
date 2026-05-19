@@ -7,6 +7,9 @@ import org.hibernate.annotations.Immutable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+// PATRÓN: Read Model (CQRS parcial) — entidad de solo lectura mapeada a la vista vw_estado_mesas.
+//   Agrega información de Mesa + Pedido + Cliente en un solo objeto optimizado para la UI.
+//   @Immutable impide que Hibernate intente persistir cambios sobre esta clase.
 @Entity
 @Table(name = "vw_estado_mesas")
 @Immutable

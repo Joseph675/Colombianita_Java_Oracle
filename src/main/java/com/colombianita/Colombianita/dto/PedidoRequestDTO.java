@@ -13,6 +13,9 @@ public class PedidoRequestDTO {
     private RepartidorRef repartidor;
     private String direccionEntrega;
     
+    private BigDecimal valorAdicional;
+    private String notaAdicional;
+
     private List<DetallePedidoDTO> detalles;
 
     // Clases anidadas para recibir los objetos que envía Angular
@@ -126,6 +129,22 @@ public class PedidoRequestDTO {
 
     public void setDireccionEntrega(String direccionEntrega) {
         this.direccionEntrega = direccionEntrega;
+    }
+
+    public BigDecimal getValorAdicional() {
+        return valorAdicional;
+    }
+
+    public void setValorAdicional(BigDecimal valorAdicional) {
+        this.valorAdicional = valorAdicional;
+    }
+
+    public String getNotaAdicional() {
+        return notaAdicional;
+    }
+
+    public void setNotaAdicional(String notaAdicional) {
+        this.notaAdicional = notaAdicional;
     }
 
     public List<DetallePedidoDTO> getDetalles() {

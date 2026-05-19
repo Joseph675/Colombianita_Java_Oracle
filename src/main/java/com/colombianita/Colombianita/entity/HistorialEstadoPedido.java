@@ -3,6 +3,9 @@ package com.colombianita.Colombianita.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+// PATRÓN: Observer — esta entidad es el "log de eventos" del patrón State del Pedido.
+//   Cada vez que el estado del pedido cambia, se registra aquí el estado anterior y el nuevo.
+// PATRÓN: Observer (JPA Lifecycle) — @PrePersist asigna la fecha del cambio automáticamente.
 @Entity
 @Table(name = "historial_estados_pedido")
 public class HistorialEstadoPedido {
@@ -27,6 +30,8 @@ public class HistorialEstadoPedido {
 
     public HistorialEstadoPedido() {}
 
+    // PATRÓN: Observer (JPA Lifecycle) — listener del evento @PrePersist.
+    // Registra automáticamente el timestamp exacto de cada transición de estado.
     @PrePersist
     protected void onCreate() {
         if (this.fechaCambio == null) {

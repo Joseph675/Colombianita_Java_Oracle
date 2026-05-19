@@ -3,6 +3,9 @@ package com.colombianita.Colombianita.entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+// PATRÓN: State — la alerta tiene dos estados (NO_LEIDA → LEIDA).
+//   El estado cambia cuando un usuario marca la alerta como revisada desde AlertaInventarioController.
+// PATRÓN: Observer (JPA Lifecycle) — @PrePersist asigna la fecha de creación automáticamente.
 @Entity
 @Table(name = "alerta_inventario")
 public class AlertaInventario {
@@ -26,11 +29,14 @@ public class AlertaInventario {
     @Column(name = "mensaje", nullable = false, length = 255)
     private String mensaje;
 
+    // PATRÓN: State — campo que representa el estado actual de la notificación
     @Column(name = "estado", length = 20)
     private String estado = "NO_LEIDA";
 
     public AlertaInventario() {}
 
+    // PATRÓN: Observer (JPA Lifecycle) — listener del evento @PrePersist.
+    // Asigna la fecha de la alerta automáticamente en el momento de la inserción.
     @PrePersist
     protected void onCreate() {
         if (this.fechaAlerta == null) {

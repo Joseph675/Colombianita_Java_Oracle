@@ -7,6 +7,9 @@ import org.hibernate.annotations.Immutable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+// PATRÓN: Read Model (CQRS parcial) — entidad de solo lectura mapeada a la vista vw_caja_turno_activo.
+//   Consolida en tiempo real los totales del turno de caja (efectivo, tarjetas, gastos, neto)
+//   calculados por Oracle. @Immutable evita cualquier intento de escritura desde Java.
 @Entity
 @Table(name = "vw_caja_turno_activo")
 @Immutable

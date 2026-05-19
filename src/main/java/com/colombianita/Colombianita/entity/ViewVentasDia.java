@@ -7,6 +7,9 @@ import org.hibernate.annotations.Immutable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+// PATRÓN: Read Model (CQRS parcial) — entidad de solo lectura mapeada a una vista de Oracle (vw_ventas_dia).
+//   Separa el modelo de lectura del modelo de escritura. @Immutable garantiza que Hibernate
+//   no intente hacer INSERT/UPDATE sobre esta clase.
 @Entity
 @Table(name = "vw_ventas_dia")
 @Immutable

@@ -24,6 +24,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+// PATRÓN: Facade — este controller orquesta múltiples subsistemas (repositorios de pedido,
+//   cliente, mesa, detalle, presentación) detrás de una interfaz HTTP simple.
+//   El caller (n8n / Angular) no sabe cuántos repositorios se coordinan internamente.
 @RestController
 @RequestMapping("/api/pedidos")
 @CrossOrigin(origins = "*")
@@ -62,7 +65,12 @@ public class PedidoController {
         return pedidoRepository.save(pedido);
     }
 
-    // ENDPOINT PARA RECIBIR PEDIDOS DESDE n8n (BOT DE WHATSAPP)
+    // PATRÓN: Facade — punto de entrada unificado que internamente:
+    //   1) hace UPSERT del cliente (busca por whatsappId → celular → crea nuevo)
+    //   2) crea el Pedido principal
+    //   3) persiste cada DetallePedido
+    //   4) transiciona el estado de la Mesa a OCUPADA (patrón State)
+    // Todo esto ocurre en una sola transacción (@Transactional = patrón Proxy de Spring).
     @PostMapping("/crear")
     @Transactional
     public ResponseEntity<?> crearPedidoCompleto(@RequestBody PedidoRequestDTO requestDTO) {
@@ -81,6 +89,10 @@ public class PedidoController {
         nuevoPedido.setEstado(requestDTO.getEstado());
         nuevoPedido.setFechaHora(LocalDateTime.now()); // Asignamos la hora actual del servidor
         nuevoPedido.setDireccionEntrega(requestDTO.getDireccionEntrega());
+        if (requestDTO.getValorAdicional() != null)
+            nuevoPedido.setValorAdicional(requestDTO.getValorAdicional());
+        if (requestDTO.getNotaAdicional() != null)
+            nuevoPedido.setNotaAdicional(requestDTO.getNotaAdicional());
 
         // ==========================================
         // 🚀 INICIO DEL UPSERT DEL CLIENTE (n8n)
@@ -209,7 +221,7 @@ public class PedidoController {
             System.out.println("🔴 ERROR DE MAPEO: La lista de detalles llegó NULA desde n8n.");
         }
 
-        // 3. Si el pedido es para una mesa, actualizar el estado de la mesa a 'OCUPADA'
+        // PATRÓN: State — transición explícita del estado de la Mesa: LIBRE → OCUPADA
         if ("MESA".equalsIgnoreCase(pedidoGuardado.getTipoPedido()) && pedidoGuardado.getIdMesa() != null) {
             Optional<com.colombianita.Colombianita.entity.Mesa> mesaOpt = mesaRepository
                     .findById(pedidoGuardado.getIdMesa());
@@ -259,6 +271,10 @@ public class PedidoController {
             pedidoAActualizar.setDireccionEntrega(detallesPedido.getDireccionEntrega());
         if (detallesPedido.getTotal() != null)
             pedidoAActualizar.setTotal(detallesPedido.getTotal());
+        if (detallesPedido.getValorAdicional() != null)
+            pedidoAActualizar.setValorAdicional(detallesPedido.getValorAdicional());
+        if (detallesPedido.getNotaAdicional() != null)
+            pedidoAActualizar.setNotaAdicional(detallesPedido.getNotaAdicional());
 
         // 2. Repartidor (lógica que ya tenías)
         if (detallesPedido.getRepartidor() != null && detallesPedido.getRepartidor().getIdUsuario() != null) {

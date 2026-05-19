@@ -2,6 +2,8 @@ package com.colombianita.Colombianita.entity;
 
 import jakarta.persistence.*;
 
+// PATRÓN: State — la mesa tiene un ciclo de vida con estados discretos (LIBRE → OCUPADA).
+// Cada transición es controlada externamente por PedidoController al crear o cerrar un pedido.
 @Entity
 @Table(name = "mesa")
 public class Mesa {
@@ -21,6 +23,7 @@ public class Mesa {
     @Column(name = "capacidad")
     private Integer capacidad;
 
+    // PATRÓN: State — estado actual del objeto. Valores posibles: "LIBRE" | "OCUPADA"
     @Column(name = "estado", length = 20)
     private String estado = "LIBRE";
 

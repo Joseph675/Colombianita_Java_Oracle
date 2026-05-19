@@ -3,6 +3,10 @@ package com.colombianita.Colombianita.entity;
 import jakarta.persistence.*;
 import java.sql.Timestamp;
 
+// PATRÓN: Message Aggregator (Enterprise Integration Patterns) — agrupa múltiples mensajes
+//   cortos del bot de WhatsApp en uno solo antes de procesarlos.
+//   El celular es la clave de correlación; mensajeAcumulado es el buffer acumulado.
+// PATRÓN: Observer (JPA Lifecycle) — @PrePersist registra el timestamp de creación automáticamente.
 @Entity
 @Table(name = "BUFFER_MENSAJES")
 public class BufferMensaje {

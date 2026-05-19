@@ -8,6 +8,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+// PATRÓN: State — el pedido transita entre estados (PENDIENTE → EN_PROCESO → PAGADO).
+// PATRÓN: Observer (JPA Lifecycle) — @PrePersist actúa como listener que reacciona al evento
+//   de inserción para asignar la fecha/hora automáticamente sin que el caller lo sepa.
 @Entity
 @Table(name = "pedido")
 public class Pedido {
@@ -44,8 +47,15 @@ public class Pedido {
     @Column(name = "direccion_entrega", length = 255)
     private String direccionEntrega;
 
+    // PATRÓN: State — campo que representa el estado actual del ciclo de vida del pedido
     @Column(name = "estado", length = 20)
     private String estado = "PAGADO";
+
+    @Column(name = "valor_adicional", precision = 10, scale = 2)
+    private BigDecimal valorAdicional = BigDecimal.ZERO;
+
+    @Column(name = "nota_adicional", length = 255)
+    private String notaAdicional;
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
@@ -53,7 +63,8 @@ public class Pedido {
 
     public Pedido() {}
 
-    // Se ejecuta automáticamente antes de insertar en base de datos para simular el DEFAULT SYSDATE
+    // PATRÓN: Observer (JPA Lifecycle) — @PrePersist es el "evento"; este método es el "listener".
+    // Se dispara automáticamente antes de INSERT sin que ningún caller tenga que invocarlo.
     @PrePersist
     protected void onCreate() {
         if (this.fechaHora == null) {
@@ -91,6 +102,12 @@ public class Pedido {
 
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+
+    public BigDecimal getValorAdicional() { return valorAdicional; }
+    public void setValorAdicional(BigDecimal valorAdicional) { this.valorAdicional = valorAdicional; }
+
+    public String getNotaAdicional() { return notaAdicional; }
+    public void setNotaAdicional(String notaAdicional) { this.notaAdicional = notaAdicional; }
 
     public List<DetallePedido> getDetalles() { return detalles; }
     public void setDetalles(List<DetallePedido> detalles) { this.detalles = detalles; }

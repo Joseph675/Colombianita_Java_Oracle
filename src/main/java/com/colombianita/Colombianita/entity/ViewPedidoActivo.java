@@ -7,6 +7,9 @@ import org.hibernate.annotations.Immutable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+// PATRÓN: Read Model (CQRS parcial) — entidad de solo lectura mapeada a la vista vw_pedidos_activos.
+//   Proyecta pedidos no pagados con datos calculados (minutosTranscurridos, estadoDisplay) que
+//   la entidad Pedido base no tiene. @Immutable impide escrituras accidentales.
 @Entity
 @Table(name = "vw_pedidos_activos")
 @Immutable

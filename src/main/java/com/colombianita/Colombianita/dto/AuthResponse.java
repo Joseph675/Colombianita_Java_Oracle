@@ -1,5 +1,7 @@
 package com.colombianita.Colombianita.dto;
 
+// PATRÓN: DTO — estructura la respuesta del login exactamente como el frontend Angular la espera.
+//   Las clases internas UserInfo y RolInfo son sub-DTOs que forman el JSON anidado { token, user: { rol: {} } }.
 public class AuthResponse {
 
     private String token;

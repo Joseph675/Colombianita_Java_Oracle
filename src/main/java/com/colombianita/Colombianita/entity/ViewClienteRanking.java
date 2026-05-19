@@ -7,6 +7,9 @@ import org.hibernate.annotations.Immutable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+// PATRÓN: Read Model (CQRS parcial) — entidad de solo lectura mapeada a la vista vw_clientes_ranking.
+//   Contiene métricas calculadas (segmento VIP/regular, rankingGasto) que no existen en la entidad Cliente.
+//   @Immutable garantiza que estos datos solo se lean, nunca se escriban desde Java.
 @Entity
 @Table(name = "vw_clientes_ranking")
 @Immutable

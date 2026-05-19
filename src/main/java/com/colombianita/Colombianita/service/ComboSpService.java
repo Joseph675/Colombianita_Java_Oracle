@@ -12,6 +12,11 @@ import java.sql.Connection;
 import java.sql.Struct;
 import java.sql.Types;
 
+// PATRÓN: Strategy — encapsula la estrategia de creación de combos mediante un Stored Procedure
+//   de Oracle. Si en el futuro se cambia la estrategia (ej: lógica Java pura), solo se reemplaza
+//   esta clase sin tocar el controller.
+// PATRÓN: Adapter — convierte objetos Java (List<ItemComboDto>) al formato nativo de Oracle
+//   (STRUCT / ARRAY de tipos definidos en la BD: OBJ_ITEM_COMBO / TABLA_ITEM_COMBO).
 @Service
 public class ComboSpService {
 
@@ -21,7 +26,8 @@ public class ComboSpService {
     public Long crearComboCompletoSp(ComboRequestDto request) throws Exception {
         try (Connection conn = dataSource.getConnection()) {
             
-            // 1. Convertir la lista de Java a un arreglo de Structs de Oracle
+            // PATRÓN: Adapter — aquí ocurre la conversión: List<ItemComboDto> (mundo Java)
+            //   → Struct[] → Array (tipos propietarios de Oracle)
             Struct[] structArray = new Struct[request.getItems().size()];
             int i = 0;
             

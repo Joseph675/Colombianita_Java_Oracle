@@ -9,6 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+// PATRÓN: Strategy — encapsula la lógica de autenticación como una estrategia intercambiable.
+//   El AuthController delega completamente en este servicio; si se cambia la estrategia
+//   (ej: OAuth2, LDAP), solo se modifica esta clase sin tocar el controller.
+// PATRÓN: Singleton — Spring gestiona esta clase como un bean singleton (@Service),
+//   garantizando una única instancia compartida en toda la aplicación.
 @Service
 public class AuthService {
 

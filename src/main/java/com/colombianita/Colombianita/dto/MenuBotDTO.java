@@ -2,6 +2,9 @@ package com.colombianita.Colombianita.dto;
 
 import java.math.BigDecimal;
 
+// PATRÓN: DTO — proyecta los datos del menú en un formato plano y simplificado
+//   específicamente diseñado para el consumo del bot de WhatsApp via n8n.
+//   Evita exponer relaciones JPA complejas (Producto → Categoria, etc.) al bot.
 public class MenuBotDTO {
     
     private Long idPresentacion;

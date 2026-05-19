@@ -8,6 +8,10 @@ import org.springframework.stereotype.Component;
 import java.security.Key;
 import java.util.Date;
 
+// PATRÓN: Singleton — Spring gestiona esta clase como un bean (@Component), garantizando
+//   una única instancia. La clave de firma se construye una sola vez y se reutiliza.
+// PATRÓN: Strategy (soporte) — AuthService delega la generación/validación del token aquí,
+//   permitiendo cambiar el algoritmo o la librería JWT sin tocar la lógica de autenticación.
 @Component
 public class JwtUtil {
 

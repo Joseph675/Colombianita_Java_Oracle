@@ -6,6 +6,9 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.Immutable;
 import java.math.BigDecimal;
 
+// PATRÓN: Read Model (CQRS parcial) — entidad de solo lectura mapeada a la vista vw_alertas_inventario.
+//   Calcula nivelAlerta y pctStock directamente en Oracle, sin necesidad de lógica Java adicional.
+//   @Immutable previene escrituras accidentales sobre datos que vienen de una vista.
 @Entity
 @Table(name = "vw_alertas_inventario")
 @Immutable

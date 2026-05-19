@@ -8,6 +8,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
+// PATRÓN: Repository — abstrae el acceso a datos de la entidad Pedido.
+// PATRÓN: Template Method — JpaRepository define el esqueleto de operaciones CRUD; aquí solo
+//   sobreescribimos con consultas específicas del dominio usando @Query y JOIN FETCH.
+// PATRÓN: Interface Projection — findTopClientes retorna List<TopClienteDTO>, una interfaz
+//   que Spring Data JPA implementa como proxy dinámico en tiempo de ejecución.
 @Repository
 public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     // Aquí puedes agregar métodos personalizados si los necesitas después, por ejemplo:
@@ -26,7 +31,9 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     @Query("SELECT p FROM Pedido p LEFT JOIN FETCH p.detalles dp LEFT JOIN FETCH dp.presentacion pr LEFT JOIN FETCH pr.producto WHERE p.idMesa = :idMesa ORDER BY p.fechaHora DESC")
     List<Pedido> findByIdMesaConDetalles(@Param("idMesa") Long idMesa);
 
-    // El "Top 10" de Mejores Clientes (Histórico)
+    // PATRÓN: Interface Projection — Spring Data JPA genera un proxy dinámico que implementa
+    //   TopClienteDTO mapeando cada alias del SELECT (idCliente, nombres, celular, totalGastado)
+    //   al método getX() correspondiente de la interfaz.
     @Query("SELECT c.idCliente as idCliente, c.nombres as nombres, c.celular as celular, SUM(p.total) as totalGastado " +
            "FROM Pedido p JOIN p.cliente c WHERE p.estado = 'PAGADO' GROUP BY c.idCliente, c.nombres, c.celular ORDER BY totalGastado DESC")
     List<TopClienteDTO> findTopClientes();
