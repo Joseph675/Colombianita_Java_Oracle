@@ -5,6 +5,7 @@ import com.colombianita.Colombianita.entity.Usuario;
 import com.colombianita.Colombianita.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,9 @@ public class UsuarioController {
     
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // Método auxiliar para convertir Entidad a DTO
     private UsuarioDTO convertirADTO(Usuario usuario) {
@@ -43,7 +47,9 @@ public class UsuarioController {
     // 2. CREATE: Guardar un nuevo usuario (POST)
     @PostMapping
     public ResponseEntity<UsuarioDTO> crearUsuario(@RequestBody Usuario usuario) {
-        // Nota: En un sistema real, aquí deberías encriptar (hash) el password antes de guardarlo.
+        if (usuario.getPasswordHash() != null && !usuario.getPasswordHash().isEmpty()) {
+            usuario.setPasswordHash(passwordEncoder.encode(usuario.getPasswordHash()));
+        }
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
         return ResponseEntity.ok(convertirADTO(usuarioGuardado));
     }
@@ -68,9 +74,9 @@ public class UsuarioController {
             usuario.setNombres(detallesUsuario.getNombres());
             usuario.setEmail(detallesUsuario.getEmail());
             
-            // Solo actualizamos el password si se provee uno nuevo
+            // Solo actualizamos el password si se provee uno nuevo, y lo encriptamos
             if (detallesUsuario.getPasswordHash() != null && !detallesUsuario.getPasswordHash().isEmpty()) {
-                usuario.setPasswordHash(detallesUsuario.getPasswordHash());
+                usuario.setPasswordHash(passwordEncoder.encode(detallesUsuario.getPasswordHash()));
             }
             
             usuario.setEstado(detallesUsuario.getEstado());

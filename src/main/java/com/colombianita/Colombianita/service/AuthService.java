@@ -31,19 +31,9 @@ public class AuthService {
         Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new RuntimeException("Error: No se encontró el usuario con el email: " + request.getEmail()));
 
-        // DEBUG TEMPORAL: Imprimir en consola para ver qué estamos comparando realmente
-        System.out.println("--- DEBUG LOGIN ---");
-        System.out.println("Email consultado: [" + request.getEmail() + "]");
-        System.out.println("Password (FRONTEND): [" + request.getPassword() + "]");
-        System.out.println("Password (BASE DE DATOS): [" + usuario.getPasswordHash() + "]");
-        System.out.println("-------------------");
-
-        // 2. Verificar password en TEXTO PLANO (Temporal para desarrollo)
-        // Usamos .trim() para evitar que espacios en blanco invisibles rompan la validación
+        // 2. Verificar password con BCrypt
         String passFront = request.getPassword() != null ? request.getPassword().trim() : "";
-        String passDB = usuario.getPasswordHash() != null ? usuario.getPasswordHash().trim() : "";
-        
-        if (!passFront.equals(passDB)) {
+        if (!passwordEncoder.matches(passFront, usuario.getPasswordHash())) {
             throw new RuntimeException("Error: La contraseña es incorrecta");
         }
 
