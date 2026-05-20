@@ -52,13 +52,13 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Permitir preflight CORS sin autenticación
+                // Preflight CORS siempre libre
                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/pedidos/crear").permitAll()
-                .requestMatchers("/api/menu-bot/**").permitAll()
-                .requestMatchers("/api/buffer-mensajes/**").permitAll()
-                .anyRequest().authenticated()
+                // Solo gestión de usuarios y roles requiere JWT
+                .requestMatchers("/api/usuarios/**").authenticated()
+                .requestMatchers("/api/roles/**").authenticated()
+                // Todo lo demás (operaciones, bot, n8n, menú, pedidos, pagos…) es libre
+                .anyRequest().permitAll()
             )
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) ->
