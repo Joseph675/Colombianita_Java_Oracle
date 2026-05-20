@@ -4,6 +4,7 @@ import com.colombianita.Colombianita.dto.CobrarRequestDTO;
 import com.colombianita.Colombianita.dto.CobrarResponseDTO;
 import com.colombianita.Colombianita.entity.*;
 import com.colombianita.Colombianita.repository.*;
+import com.colombianita.Colombianita.service.CierreCajaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ public class CobrarController {
     @Autowired private PagoRepository pagoRepository;
     @Autowired private CierreCajaRepository cierreCajaRepository;
     @Autowired private UsuarioRepository usuarioRepository;
+    @Autowired private CierreCajaService cierreCajaService;
 
     @PostMapping
     @Transactional
@@ -94,6 +96,9 @@ public class CobrarController {
             pago.setDescripcion(linea.getDescripcion());
             pagosCreados.add(pagoRepository.save(pago));
         }
+
+        // Actualizar totales del turno en tiempo real para que el modal de cierre sea correcto
+        cierreCajaService.recalcularTotales(dto.getIdCierre());
 
         CobrarResponseDTO response = new CobrarResponseDTO();
         response.setFactura(facturaGuardada);

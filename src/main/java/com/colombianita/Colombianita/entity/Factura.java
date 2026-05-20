@@ -3,6 +3,7 @@ package com.colombianita.Colombianita.entity;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "factura")
@@ -47,6 +48,9 @@ public class Factura {
     @Column(name = "razon_social", length = 100)
     private String razonSocial;
 
+    @OneToMany(mappedBy = "factura", fetch = FetchType.EAGER)
+    private List<Pago> pagos;
+
     public Factura() {}
 
     @PrePersist
@@ -89,4 +93,7 @@ public class Factura {
 
     public String getRazonSocial() { return razonSocial; }
     public void setRazonSocial(String razonSocial) { this.razonSocial = razonSocial; }
+
+    public List<Pago> getPagos() { return pagos; }
+    public void setPagos(List<Pago> pagos) { this.pagos = pagos; }
 }
