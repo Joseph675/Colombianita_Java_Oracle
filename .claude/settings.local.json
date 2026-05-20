@@ -4,7 +4,8 @@
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Kevin\\\\Documents\\\\GitHub\\\\Colombianita_Java_Oracle\" -Recurse -Filter \"*.java\")",
       "Bash(Select-Object FullName)",
       "Bash(Sort-Object FullName)",
-      "Bash(dir \"C:\\\\Users\\\\Kevin\\\\Documents\\\\GitHub\\\\Pizzeria_Colimbianita\\\\src\")"
+      "Bash(dir \"C:\\\\Users\\\\Kevin\\\\Documents\\\\GitHub\\\\Pizzeria_Colimbianita\\\\src\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Kevin\\\\Documents\\\\GitHub\\\\Colombianita_Java_Oracle\" -Recurse -Directory)"
     ]
   }
 }

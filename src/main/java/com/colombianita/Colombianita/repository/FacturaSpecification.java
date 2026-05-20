@@ -1,22 +1,33 @@
 package com.colombianita.Colombianita.repository;
 
 import com.colombianita.Colombianita.entity.Factura;
+import com.colombianita.Colombianita.entity.Pago;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.Subquery;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
 
-// PATRÓN: Specification — encapsula cada criterio de filtrado como un objeto reutilizable.
-//   Las especificaciones se combinan con .and() / .or() en el controller sin tocar el repositorio.
-//   Esto evita tener un método findBy* por cada combinación de filtros posible.
 public class FacturaSpecification {
 
-    // PATRÓN: Specification — criterio de filtro por método de pago. Retorna null si no aplica (filtro ignorado).
+    // Filtra facturas que tengan al menos un pago con el método indicado.
+    // Se usa EXISTS sobre pagos porque factura.metodoPago ahora puede ser null o 'MIXTO'.
     public static Specification<Factura> metodoPagoEquals(String metodoPago) {
         return (root, query, builder) -> {
             if (metodoPago == null || metodoPago.isEmpty()) {
                 return null;
             }
-            return builder.equal(root.get("metodoPago"), metodoPago);
+            Subquery<Long> sub = query.subquery(Long.class);
+            Root<Pago> pago = sub.from(Pago.class);
+            sub.select(builder.literal(1L))
+               .where(
+                   builder.equal(pago.get("factura"), root),
+                   builder.equal(
+                       builder.upper(pago.get("metodoPago")),
+                       metodoPago.toUpperCase()
+                   )
+               );
+            return builder.exists(sub);
         };
     }
 

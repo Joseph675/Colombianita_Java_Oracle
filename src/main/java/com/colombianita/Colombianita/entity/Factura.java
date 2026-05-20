@@ -26,7 +26,7 @@ public class Factura {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "metodo_pago", nullable = false, length = 50)
+    @Column(name = "metodo_pago", length = 50)
     private String metodoPago;
 
     @Column(name = "subtotal", nullable = false, precision = 10, scale = 2)
