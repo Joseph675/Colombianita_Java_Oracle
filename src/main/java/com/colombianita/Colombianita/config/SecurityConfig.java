@@ -1,6 +1,7 @@
 package com.colombianita.Colombianita.config;
 
 import com.colombianita.Colombianita.filter.JwtFilter;
+import com.colombianita.Colombianita.util.JwtUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -18,7 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Autowired
-    private JwtFilter jwtFilter;
+    private JwtUtil jwtUtil;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -32,20 +33,17 @@ public class SecurityConfig {
             .cors(cors -> cors.configure(http))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                // Login público
                 .requestMatchers("/api/auth/**").permitAll()
-                // Endpoints llamados por n8n / bot de WhatsApp (sin sesión de usuario)
                 .requestMatchers("/api/pedidos/crear").permitAll()
                 .requestMatchers("/api/menu-bot/**").permitAll()
                 .requestMatchers("/api/buffer-mensajes/**").permitAll()
-                // Todo lo demás requiere JWT válido
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) ->
                     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized"))
             )
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
