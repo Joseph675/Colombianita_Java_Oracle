@@ -1,5 +1,6 @@
 package com.colombianita.Colombianita.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -48,6 +49,7 @@ public class Factura {
     @Column(name = "razon_social", length = 100)
     private String razonSocial;
 
+    @JsonManagedReference("factura-pagos")
     @OneToMany(mappedBy = "factura", fetch = FetchType.EAGER)
     private List<Pago> pagos;
 

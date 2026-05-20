@@ -1,5 +1,6 @@
 package com.colombianita.Colombianita.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ public class Pago {
     @JoinColumn(name = "id_pedido", nullable = false)
     private Pedido pedido;
 
+    @JsonBackReference("factura-pagos")
     @ManyToOne
     @JoinColumn(name = "id_factura")
     private Factura factura;
