@@ -75,7 +75,7 @@ public class CobrarController {
         factura.setUsuario(usuario);
         factura.setSubtotal(dto.getSubtotal());
         factura.setImpuestos(impuestos);
-        factura.setTotal(dto.getSubtotal().add(impuestos));
+        factura.setTotal(dto.getTotal());
         factura.setNitCliente(dto.getNitCliente());
         factura.setRazonSocial(dto.getRazonSocial());
         // Si hay una sola línea de pago, guarda el método; si hay varias, es MIXTO
