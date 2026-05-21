@@ -109,10 +109,14 @@ public class PedidoController {
                 clienteExistente = clienteRepository.findByWhatsappId(whatsappIdRecibido);
             }
 
-            // 2. Fallback: si no lo encuentra por whatsappId, buscamos por celular (para
-            // clientes antiguos en BD)
+            // 2. Fallback por celular (clientes anteriores a WhatsApp)
             if (!clienteExistente.isPresent() && celularRecibido != null && !celularRecibido.trim().isEmpty()) {
                 clienteExistente = clienteRepository.findByCelular(celularRecibido);
+            }
+
+            // 3. Fallback por idCliente (Angular selecciona un cliente existente sin celular/whatsappId)
+            if (!clienteExistente.isPresent() && requestDTO.getCliente().getIdCliente() != null) {
+                clienteExistente = clienteRepository.findById(requestDTO.getCliente().getIdCliente());
             }
 
             Cliente clienteDelPedido;
@@ -161,7 +165,8 @@ public class PedidoController {
             } else {
                 System.out.println("� Cliente nuevo detectado. Creando registro en BD...");
                 Cliente nuevoCliente = new Cliente();
-                nuevoCliente.setCelular(celularRecibido);
+                // Si n8n no envía celular, usar whatsappId como fallback (son el mismo número)
+                nuevoCliente.setCelular(celularRecibido != null ? celularRecibido : whatsappIdRecibido);
                 nuevoCliente.setNombres(nombreRecibido);
                 nuevoCliente.setDireccionPredeterminada(direccionRecibida); // Guardamos su primera dirección
                 nuevoCliente.setWhatsappId(whatsappIdRecibido); // Guardamos su ID de WhatsApp desde el principio
