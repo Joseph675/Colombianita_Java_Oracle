@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,7 +88,7 @@ public class PedidoController {
         nuevoPedido.setTotal(requestDTO.getTotal());
         nuevoPedido.setTipoPedido(requestDTO.getTipoPedido());
         nuevoPedido.setEstado(requestDTO.getEstado());
-        nuevoPedido.setFechaHora(LocalDateTime.now()); // Asignamos la hora actual del servidor
+        nuevoPedido.setFechaHora(LocalDateTime.now(ZoneId.of("America/Bogota")));
         nuevoPedido.setDireccionEntrega(requestDTO.getDireccionEntrega());
         if (requestDTO.getValorAdicional() != null)
             nuevoPedido.setValorAdicional(requestDTO.getValorAdicional());

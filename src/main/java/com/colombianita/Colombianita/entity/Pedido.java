@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,7 +69,7 @@ public class Pedido {
     @PrePersist
     protected void onCreate() {
         if (this.fechaHora == null) {
-            this.fechaHora = LocalDateTime.now();
+            this.fechaHora = LocalDateTime.now(ZoneId.of("America/Bogota"));
         }
     }
 
